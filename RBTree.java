@@ -36,7 +36,7 @@ public class RBTree {
    *
    */
   public RBNode getRoot() {
-    return root; // to be replaced by student code
+    return root;
   }
   
   /**
@@ -46,7 +46,7 @@ public class RBTree {
    *
    */
   public boolean empty() {
-    return size == 0; // to be replaced by student code
+    return (size == 0);
   }
 
  /**
@@ -57,19 +57,28 @@ public class RBTree {
    */
   public String search(int k)
   {
-	  if(empty()){
+	  if(this.empty())
+    {
 		  return null;
 	  }
-	  RBNode x = root;
-	  while(x != null){
-		  if(x.key == k){
-			  return x.value;
+	  RBNode currentNode = root;
+
+	  while(null != currentNode)
+    {
+      // if found the wanted node
+		  if(currentNode.key == k)
+      {
+			  return currentNode.value;
 		  }
-		  else if(x.key < k){
-			  x = x.right;
+      // if the wanted node has a larger key
+		  else if(currentNode.key < k)
+      {
+			  currentNode = currentNode.right;
 		  }
-		  else{
-			  x = x.left;
+      // if the wanted node has a smaller key
+		  else
+      {
+			  currentNode = currentNode.left;
 		  }
 	  }
 	  return null;
@@ -108,14 +117,18 @@ public class RBTree {
     */
    public String min()
    {
-	   if(empty()){
+	   if(this.empty())
+     {
 		   return null;
 	   }
-	   RBNode x = root;
-	   while(x.left != null){
-		   x = x.left;
+
+	   RBNode currentNode = root;
+
+	   while(null != currentNode.left)
+     {
+		   currentNode = currentNode.left;
 	   }
-	   return x.value;
+	   return currentNode.value;
    }
 
    /**
@@ -126,14 +139,16 @@ public class RBTree {
     */
    public String max()
    {
-	   if(empty()){
+	   if(this.empty())
+     {
 		   return null;
 	   }
-	   RBNode x = root;
-	   while(x.right != null){
-		   x = x.right;
+	   RBNode currentNode = root;
+	   while(null != currentNode.right)
+     {
+		   currentNode = currentNode.right;
 	   }
-	   return x.value;
+	   return currentNode.value;
    }
 
   /**
@@ -144,8 +159,8 @@ public class RBTree {
    */
   public int[] keysToArray()
   {
-	  int[] arr = new int[size];
-	  TreeKeysToArray(root, arr, 0);
+	  int[] keysArr = new int[this.size];
+	  generateKeysArray(root, keysArr, 0);
 	  return arr;
   }
 
@@ -158,8 +173,8 @@ public class RBTree {
    */
   public String[] valuesToArray()
   {
-	  String[] arr = new String[size];
-	  TreeValuesToArray(root, arr, 0);
+	  String[] valuesArr = new String[size];
+	  generateValuesArray(root, valuesArr, 0);
 	  return arr;
   }
 
@@ -173,7 +188,7 @@ public class RBTree {
     */
    public int size()
    {
-	   return size;
+	   return this.size;
    }
    
  /**
@@ -181,26 +196,55 @@ public class RBTree {
    * another file.
    */
    
-   public int TreeKeysToArray(RBNode root, int[] arr, int index)
+
+   /**
+    * public int generateKeysArray()
+    *
+    * Returns a sorted array with the keys in the tree
+    *
+    * @ param 
+    * root: a pointer to the tree's root node.
+    * arr:  an array which will eventually contain the result, should be large enought
+    *         to contain all keys.
+    * index:  should be 0 when intialy invoked
+    * 
+    */
+   public int generateKeysArray(RBNode root, int[] arr, int index)
    {
-	   if(root == null){
-		   return index;
-	   }
-	   index = TreeKeysToArray(root.left, arr, index);
-	   arr[index++] = root.key;
-	   index = TreeKeysToArray(root.right, arr, index);
-	   return index;
+      if(null == root)
+      {
+        return index;
+      }
+
+      index = generateKeysArray(root.left, arr, index);
+      arr[index++] = root.key;
+      index = generateKeysArray(root.right, arr, index);
+      return index;
    }
    
-   public int TreeValuesToArray(RBNode root, String[] arr, int index)
-   {
-	   if(root == null){
-		   return index;
-	   }
-	   index = TreeValuesToArray(root.left, arr, index);
-	   arr[index++] = root.value;
-	   index = TreeValuesToArray(root.right, arr, index);
-	   return index;
+   /**
+    * public int generateValuesArray()
+    *
+    * Returns a sorted array with the values in the tree (sorted by key)
+    *
+    * @ param 
+    * root: a pointer to the tree's root node.
+    * arr:  an array which will eventually contain the result, should be large enought
+    *         to contain all keys.
+    * index:  should be 0 when intialy invoked
+    * 
+    */
+
+  public int generateValuesArray(RBNode root, String[] arr, int index)
+  {
+    if(root == null)
+    {
+      return index;
+    }
+    index = generateValuesArray(root.left, arr, index);
+    arr[index++] = root.value;
+    index = generateValuesArray(root.right, arr, index);
+    return index;
    }
 
 }
