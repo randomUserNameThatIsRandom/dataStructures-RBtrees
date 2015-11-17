@@ -20,8 +20,17 @@ public class RBTree {
 	  	private int key;
 	  	private RBNode left;
 	  	private RBNode right;
+	  	private RBNode parent;
 	  	private boolean is_red;
 	  	
+	  	RBNode(int key, String value, boolean is_red){
+	  		this.key = key;
+	  		this.value = value;
+	  		this.is_red = is_red;
+	  		this.left = null;
+	  		this.right = null;
+	  		this.parent = null;
+	  	}
 		boolean isRed(){ return is_red;}
 		RBNode getLeft(){return left;}
 		RBNode getRight(){return right;}
@@ -93,7 +102,32 @@ public class RBTree {
    * returns -1 if an item with key k already exists in the tree.
    */
    public int insert(int k, String v) {
-	  return 42;	// to be replaced by student code
+	   RBNode insertNode = new RBNode(k,v,true);
+	   
+	   if(this.empty())
+	   {
+		   this.root = insertNode;
+		   this.root.is_red = false;
+		   return 1;
+	   }
+	   
+	   RBNode positionNode = findPosition(this.root, k);
+	   if(positionNode.key == k)
+	   {
+		   return -1;
+	   }
+	   
+	   this.size++;
+	   insertNode.parent = positionNode;
+	   if(k < positionNode.key)
+	   {
+		   positionNode.left = insertNode;
+	   }
+	   else
+	   {
+		   positionNode.right = insertNode;
+	   }
+	   return insertFixup(insertNode);
    }
 
   /**
@@ -161,7 +195,7 @@ public class RBTree {
   {
 	  int[] keysArr = new int[this.size];
 	  generateKeysArray(root, keysArr, 0);
-	  return arr;
+	  return keysArr;
   }
 
   /**
@@ -175,7 +209,7 @@ public class RBTree {
   {
 	  String[] valuesArr = new String[size];
 	  generateValuesArray(root, valuesArr, 0);
-	  return arr;
+	  return valuesArr;
   }
 
    /**
@@ -246,7 +280,125 @@ public class RBTree {
     index = generateValuesArray(root.right, arr, index);
     return index;
    }
+  
+  public RBNode findPosition(RBNode node, int k)
+  {
+	  RBNode positionNode = null;
+	  while(node != null)
+	   {
+		  positionNode = node;
+		   if(k == node.key)
+		   {
+			   return positionNode;
+		   }
+		   else if(k < node.key)
+		   {
+			   node = node.left;
+		   }
+		   else
+		   {
+			   node = node.right;
+		   }
+	   }
+	  return positionNode;
+  }
+  
+  public int insertFixup(RBNode node)
+  {
+	  int colorFlipsNum = 0;
+	  while(node.parent != null && node.parent.is_red)
+	  {
+		  if(node.parent == node.parent.parent.left)
+		  {
+			  RBNode uncleNode = node.parent.parent.right;
+			  if(uncleNode.is_red)
+			  {
+				  colorFlipsNum += 3;
+				  node.parent.is_red = false;
+				  uncleNode.is_red = false;
+				  node.parent.parent.is_red = true;
+				  node = node.parent.parent;
+			  }
+			  else
+			  {
+				  if(node == node.parent.right)
+				  {
+					  node = node.parent;
+					  leftRotate(node);
+				  }
+				  colorFlipsNum += 2;
+				  node.parent.is_red = false;
+				  node.parent.parent.is_red = true;
+				  rightRotate(node.parent.parent);
+			  }
+		  }
+		  else
+		  {
+			  RBNode uncleNode = node.parent.parent.left;
+			  if(uncleNode.is_red)
+			  {
+				  colorFlipsNum += 3;
+				  node.parent.is_red = false;
+				  uncleNode.is_red = false;
+				  node.parent.parent.is_red = true;
+				  node = node.parent.parent;
+			  }
+			  else
+			  {
+				  if(node == node.parent.left)
+				  {
+					  node = node.parent;
+					  rightRotate(node);
+				  }
+				  colorFlipsNum += 2;
+				  node.parent.is_red = false;
+				  node.parent.parent.is_red = true;
+				  leftRotate(node.parent.parent);
+			  }
+		  }
+	  }
+	  //T.left.color = BLACK??
+	  return colorFlipsNum;
+  }
+
+  private void rightRotate(RBNode node)
+  {
+	  RBNode leftNode = node.left;
+	  replaceNodes(node, leftNode);
+	  makeLeftChild(node, leftNode.right);
+	  makeRightChild(leftNode, node);
+  }
+
+  private void leftRotate(RBNode node)
+  {
+	  RBNode rightNode = node.right;
+	  replaceNodes(node, rightNode);
+	  makeRightChild(node, rightNode.left);
+	  makeLeftChild(rightNode, node);
+  }
+
+  private void makeLeftChild(RBNode parent, RBNode child)
+  {
+	  parent.left = child;
+	  child.parent = parent;
+  }
+
+  private void makeRightChild(RBNode parent, RBNode child)
+  {
+	  parent.right = child;
+	  child.parent = parent;
+  }
+
+  private void replaceNodes(RBNode toReplaceNode, RBNode replacingNode)
+  {
+	  if(toReplaceNode == toReplaceNode.parent.left)
+	  {
+		  makeLeftChild(toReplaceNode.parent, replacingNode);
+	  }
+	  else
+	  {
+		  makeRightChild(toReplaceNode.parent, replacingNode);
+	  }
+  }
 
 }
-  
-
