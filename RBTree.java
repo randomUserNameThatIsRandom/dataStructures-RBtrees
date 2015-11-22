@@ -37,6 +37,8 @@ public class RBTree {
 		String getValue(){return value;}
 		int getKey(){return key;}
 	}
+
+//************************************************************************************
 	
  /**
    * public RBNode getRoot()
@@ -48,6 +50,7 @@ public class RBTree {
     return root;
   }
   
+ //************************************************************************************
   /**
    * public boolean empty()
    *
@@ -58,6 +61,7 @@ public class RBTree {
     return (size == 0);
   }
 
+//************************************************************************************
  /**
    * public String search(int k)
    *
@@ -92,6 +96,8 @@ public class RBTree {
 	  }
 	  return null;
   }
+
+//************************************************************************************
 
   /**
    * public int insert(int k, String v)
@@ -130,6 +136,8 @@ public class RBTree {
 	   return insertFixup(insertNode);
    }
 
+//************************************************************************************
+
   /**
    * public int delete(int k)
    *
@@ -165,6 +173,7 @@ public class RBTree {
 	   return currentNode.value;
    }
 
+//************************************************************************************
    /**
     * public String max()
     *
@@ -185,6 +194,7 @@ public class RBTree {
 	   return currentNode.value;
    }
 
+//************************************************************************************
   /**
    * public int[] keysToArray()
    *
@@ -198,6 +208,7 @@ public class RBTree {
 	  return keysArr;
   }
 
+//************************************************************************************
   /**
    * public String[] valuesToArray()
    *
@@ -224,13 +235,8 @@ public class RBTree {
    {
 	   return this.size;
    }
-   
- /**
-   * If you wish to implement classes, other than RBTree and RBNode, do it in this file, not in 
-   * another file.
-   */
-   
 
+//************************************************************************************   
    /**
     * public int generateKeysArray()
     *
@@ -255,7 +261,8 @@ public class RBTree {
       index = generateKeysArray(root.right, arr, index);
       return index;
    }
-   
+
+//************************************************************************************   
    /**
     * public int generateValuesArray()
     *
@@ -266,7 +273,8 @@ public class RBTree {
     * arr:  an array which will eventually contain the result, should be large enought
     *         to contain all keys.
     * index:  should be 0 when intialy invoked
-    * 
+    * @ return:
+    * 	A sorted array with the values in the tree (sorted by key)
     */
 
   public int generateValuesArray(RBNode root, String[] arr, int index)
@@ -280,29 +288,42 @@ public class RBTree {
     index = generateValuesArray(root.right, arr, index);
     return index;
    }
-  
-  public RBNode findPosition(RBNode node, int k)
+
+//************************************************************************************  
+   /**
+    * public int findPosition()
+    * @ param 
+    * 	root: the node to start the search from
+    * 	requiredKey: the key of the node the user request to be found.
+	* @ return
+    *	A Red Black tree node that has the specified key, null if no such node
+    *	exists
+    */
+  public RBNode findPosition(RBNode root, int requiredKey)
   {
-	  RBNode positionNode = null;
-	  while(node != null)
+	  RBNode currentNode = root;
+	  while(null != currentNode)
 	   {
-		  positionNode = node;
-		   if(k == node.key)
+		   if(requiredKey == currentNode.key)
 		   {
-			   return positionNode;
+			   return currentNode;
 		   }
-		   else if(k < node.key)
+		   else if(requiredKey < currentNode.key)
 		   {
-			   node = node.left;
+			   currentNode = currentNode.left;
 		   }
 		   else
 		   {
-			   node = node.right;
+			   currentNode = currentNode.right;
 		   }
 	   }
-	  return positionNode;
+	  return null;
   }
-  
+
+//************************************************************************************
+/*
+	* TODO AVIV - document this.
+*/ 
   public int insertFixup(RBNode node)
   {
 	  int colorFlipsNum = 0;
@@ -361,6 +382,13 @@ public class RBTree {
 	  return colorFlipsNum;
   }
 
+//************************************************************************************
+   /**
+    * public void rightRotate()
+    * rotates right around the speicifed node
+    * @ param 
+    * 	node: the parnet in the intersection we want to rotate
+*/
   private void rightRotate(RBNode node)
   {
 	  RBNode leftNode = node.left;
@@ -369,6 +397,13 @@ public class RBTree {
 	  makeRightChild(leftNode, node);
   }
 
+//************************************************************************************
+  /**
+    * public void leftRotate()
+    * rotates left around the speicifed node
+    * @ param 
+    * 	node: the node to rotate around
+*/
   private void leftRotate(RBNode node)
   {
 	  RBNode rightNode = node.right;
@@ -377,28 +412,57 @@ public class RBTree {
 	  makeLeftChild(rightNode, node);
   }
 
+//************************************************************************************
+  /**
+    * public void makeLeftChild()
+    * makes child the left child of the parent, overriding
+    * any exising left child
+    * @ param 
+    * 	parent: the node to act as parent
+    * 	child:  the node that will become the left child
+*/
   private void makeLeftChild(RBNode parent, RBNode child)
   {
 	  parent.left = child;
 	  child.parent = parent;
   }
 
+//************************************************************************************
+    /**
+    * public void makeRightChild()
+    * makes child the right child of the parent, overriding
+    * any exising right child
+    * @ param 
+    * 	parent: the node to act as parent
+    * 	child:  the node that will become the right child
+*/
   private void makeRightChild(RBNode parent, RBNode child)
   {
 	  parent.right = child;
 	  child.parent = parent;
   }
 
-  private void replaceNodes(RBNode toReplaceNode, RBNode replacingNode)
-  {
-	  if(toReplaceNode == toReplaceNode.parent.left)
-	  {
-		  makeLeftChild(toReplaceNode.parent, replacingNode);
-	  }
-	  else
-	  {
-		  makeRightChild(toReplaceNode.parent, replacingNode);
-	  }
-  }
+//************************************************************************************
+  /**
+    * public void replaceNodes()
+    * overrides nodeToReplace with replacingNode
+    * maintains any pointers external entities had to the nodes.
+    * @ param 
+    * 	nodeToReplace: the node to be overriden
+    * 	replacingNode: the node to override with
+*/
+	private void replaceNodes(RBNode nodeToReplace, RBNode replacingNode)
+	{
+		// if the node to replace is its parent's left child
+		if(nodeToReplace == nodeToReplace.parent.left)
+		{
+			makeLeftChild(nodeToReplace.parent, replacingNode);
+		}
+		// if th node to replace is its prent's right child
+		else
+		{
+			makeRightChild(nodeToReplace.parent, replacingNode);
+		}
+	}
 
 }
