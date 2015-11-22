@@ -114,6 +114,7 @@ public class RBTree {
 	   {
 		   this.root = insertNode;
 		   this.root.is_red = false;
+		   this.size++;
 		   return 1;
 	   }
 	   
@@ -151,6 +152,7 @@ public class RBTree {
 	   return 42;	// to be replaced by student code
    }
 
+//************************************************************************************
    /**
     * public String min()
     *
