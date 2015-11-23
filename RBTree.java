@@ -11,6 +11,7 @@ public class RBTree {
 	
 	private RBNode root = null;
 	private int size = 0;
+	private final RBNode dummyNode = new RBNode(-1 ,"" , false);
 
 /**
    * public class RBNode
@@ -118,7 +119,7 @@ public class RBTree {
 		   return 1;
 	   }
 	   
-	   RBNode positionNode = findPosition(this.root, k);
+	   RBNode positionNode = getNodeWithKey(this.root, k);
 	   if(positionNode.key == k)
 	   {
 		   return -1;
@@ -138,7 +139,7 @@ public class RBTree {
    }
 
 //************************************************************************************
-
+// TODO JONATHAN - make sure that our implemntation indeed has a black leaf to every node that has a key/value.
   /**
    * public int delete(int k)
    *
@@ -149,7 +150,247 @@ public class RBTree {
    */
    public int delete(int k)
    {
-	   return 42;	// to be replaced by student code
+		RBNode nodeToDelete = getNodeWithKey(this.root, k);
+		
+		// the node we are requested to delete is not in the tree
+		if(null == nodeToDelete)
+		{
+			return -1;
+		}
+
+		this.size -= 1;
+
+		// if the node has both children
+		if (-1 != nodeToDelete.left.key && -1 != nodeToDelete.right.key)
+		{
+			// delete the minimal node in the right subtree.
+			RBNode nodeToReplaceWith = findMinimalNode(nodeToDelete.right);
+
+			// node to replace with doesn't have a left child.
+			nodeToDelete.key = nodeToReplaceWith.key;
+			nodeToDelete.value = nodeToReplaceWith.value;
+			nodeToDelete = nodeToReplaceWith;
+		}
+
+		// by the time we get here nodeToDelete has only one child that is not a dummy.
+		if (nodeToDelete.is_red) // if the node is red than the tree will be valid after removing it.
+		{
+			removeNodeWithUpToOneChild(nodeToDelete);
+			return 0;	
+		}
+
+		// the node we want to delete is black.
+
+		RBNode nodeToDeleteChild = nodeToDelete.right;
+		if (-1 == nodeToDeleteChild.key) 
+		{
+			nodeToDeleteChild = nodeToDelete.left;
+		}
+		if (nodeToDeleteChild.is_red) 
+		{
+			nodeToDeleteChild.is_red = false;
+			removeNodeWithUpToOneChild(nodeToDelete);
+			return 1;		
+		}
+
+		// the node we want to delete is black and it has a black child.
+		removeNodeWithUpToOneChild(nodeToDelete);
+		return(fixDeleteDoubleBlack(nodeToDeleteChild));
+
+   }
+	//************************************************************************************
+	/**
+   * public int fixDeleteDoubleBlack(int k)
+   *
+   * fixes the issue that the subtree under doubleBlackNode has a black depth lower by one
+   * than any of it's relatives.
+   * @ params
+   *	doubleBlackNode: the node that requires the fix
+   * @ return
+   *	the number of color changes made.
+   */
+	private int fixDeleteDoubleBlack(RBNode doubleBlackNode)
+	{
+		RBNode doubleBlackNodeSibling = doubleBlackNode.parent.left;
+		if (doubleBlackNodeSibling == doubleBlackNode) 
+		{
+			doubleBlackNodeSibling = doubleBlackNode.parent.right;	
+		}
+		RBNode doubleBlackNodeParent = doubleBlackNode.parent;
+		boolean isDoubleBlackNodeLeftChild = (doubleBlackNode.parent.left == doubleBlackNode);
+
+		// if the sibling and the node with the problem are black
+		if (!doubleBlackNode.is_red && !doubleBlackNodeSibling.is_red) 
+		{
+			// if both of the sibling's children are black
+			if (!doubleBlackNodeSibling.right.is_red && !doubleBlackNodeSibling.left.is_red) 
+			{
+				// if the parent is black
+				if(!doubleBlackNodeParent.is_red)
+				{
+					doubleBlackNodeSibling.is_red = true;
+					return (1 + fixDeleteDoubleBlack(doubleBlackNodeParent))	
+				}
+				// if the parent is red
+				else
+				{
+					doubleBlackNodeParent.is_red = false;
+					doubleBlackNodeSibling.is_red = true;
+					return 2;
+				}
+			}
+			// at least one of the sibling's children is red
+			else
+			{	
+				// if the sibling's right child is red (case 3)
+				if (doubleBlackNodeSibling.right.is_red) 
+				{
+					if (isDoubleBlackNodeLeftChild) 
+					{
+						int colorFlipsNum = 0
+						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
+						{
+							colorFlipsNum++;
+						}
+						if (doubleBlackNodeParent.is_red) 
+						{
+							colorFlipsNum++;	
+						}
+
+						doubleBlackNodeSibling.is_red = doubleBlackNodeParent.is_red;
+						doubleBlackNodeParent.is_red = false;
+						doubleBlackNodeSibling.right.is_red = false;		
+						leftRotate(doubleBlackNode.parent);	
+						return (colorFlipsNum + 1);
+					}
+					// if the double black node is a right child.
+					// TODO - is there a simpler way to do this one? this is an ajacent cace I deduced.
+					else
+					{
+						int colorFlipsNum = 0
+						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
+						{
+							colorFlipsNum++;
+						}
+						if (doubleBlackNodeParent.is_red) 
+						{
+							colorFlipsNum++;	
+						}
+						doubleBlackNodeSibling.is_red = doubleBlackNodeParent.is_red;
+						doubleBlackNodeParent.is_red = false;
+						RBNode newPossibleDoubleBlack = doubleBlackNodeSibling.left;
+						rightRotate(doubleBlackNodeParent);
+						if (newPossibleDoubleBlack.is_red) 
+						{
+							newPossibleDoubleBlack.is_red = false;
+							++colorFlipsNum	
+							return(colorFlipsNum)
+						}
+						return(colorFlipsNum + fixDeleteDoubleBlack(newPossibleDoubleBlack));
+					}
+				}
+				// the siblig's left child is red and we can assume that the right one is black
+				// other wise we would have been in case 3 (case 4)
+				else 
+				{
+					if (isDoubleBlackNodeLeftChild) 
+					{
+						doubleBlackNodeSibling.left.is_red = false;
+						doubleBlackNodeSibling.is_red = true;
+						rightRotate(doubleBlackNodeSibling);
+						return(2 + fixDeleteDoubleBlack(doubleBlackNode));
+					}
+					// if the double black node is a right child.
+					else
+					{
+						int colorFlipsNum = 0
+						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
+						{
+							colorFlipsNum++;
+						}
+						if (doubleBlackNodeParent.is_red) 
+						{
+							colorFlipsNum++;	
+						}
+						doubleBlackNodeSibling.is_red = doubleBlackNodeParent.is_red;
+						doubleBlackNodeParent.is_red = false;
+						doubleBlackNodeSibling.left.is_red = false;
+						rightRotate(doubleBlackNodeParent);
+						return(colorFlipsNum + 1);
+					}
+				}
+			}
+		}
+		// if only the problematic node is black and it's sibling is red.
+		else
+		{
+			if (isDoubleBlackNodeLeftChild) 
+			{
+				doubleBlackNodeSibling.is_red = false;
+				doubleBlackNodeParent.is_red = true;
+				leftRotate(doubleBlackNodeParent);
+				return(2 + fixDeleteDoubleBlack(doubleBlackNode));
+			}
+			// if the double black node is a right child.
+			else
+			{
+				doubleBlackNodeSibling.is_red = false;
+				doubleBlackNodeParent.is_red = true;
+				rightRotate(doubleBlackNodeParent);
+				return(2 + fixDeleteDoubleBlack(doubleBlackNode));
+			}
+		}
+
+		// make sure we don't get here
+		// TODO - remove this when we finish debuging.
+		assert(false);
+	}
+
+//************************************************************************************
+    /**
+    * private void removeNodeWithUpToOneChild
+    *
+    * removes the specificed node from the tree
+    *
+    * @ param 
+    * nodeToDelete: a pointer to the node to remove
+    */
+   private void removeNodeWithUpToOneChild(RBNode nodeToDelete)
+   {
+   		boolean isNodeLeftChild = (nodeToDelete.parent.left == nodeToDelete);
+   		// if the node has no children
+		if (-1 == nodeToDelete.left.key && -1 == nodeToDelete.right.key) 
+		{
+			if (isNodeLeftChild) 
+			{
+				nodeToDeleteParent.left = dummy;	
+			}
+			else
+			{
+				nodeToDeleteParent.right = dummy;		
+			}
+		}
+		// if the node has one child
+		else if ((-1 == nodeToDelete.right.key) || (-1 == nodeToDelete.left.key)) 
+		{
+			RBNode nodeToDeleteChild = nodeToDelete.right;
+			if (-1 == nodeToDeleteChild.key) 
+			{
+				nodeToDeleteChild = nodeToDelete.left;
+			}
+			nodeToDeleteChild.parent = nodeToDelete.parent;
+
+			// make nodeToDelete's child the child of nodeToDelete's parent. 
+			if (isNodeLeftChild) 
+			{
+				nodeToDelete.parent.left = nodeToDeleteChild	
+			}
+			else
+			{
+				nodeToDelete.parent.right = nodeToDeleteChild		
+			}
+
+		}
    }
 
 //************************************************************************************
@@ -161,40 +402,40 @@ public class RBTree {
     */
    public String min()
    {
-	   if(this.empty())
-     {
-		   return null;
-	   }
+		if(this.empty())
+		{
+			return null;
+		}
 
-	   RBNode currentNode = root;
+		RBNode currentNode = root;
 
-	   while(null != currentNode.left)
-     {
-		   currentNode = currentNode.left;
-	   }
+		while(-1 != currentNode.left.key)
+		{
+			currentNode = currentNode.left;
+		}
 	   return currentNode.value;
-   }
+	}
 
 //************************************************************************************
-   /**
+	/**
     * public String max()
     *
     * Returns the value of the item with the largest key in the tree,
     * or null if the tree is empty
     */
-   public String max()
-   {
-	   if(this.empty())
-     {
-		   return null;
-	   }
-	   RBNode currentNode = root;
-	   while(null != currentNode.right)
-     {
-		   currentNode = currentNode.right;
-	   }
-	   return currentNode.value;
-   }
+	public String max()
+	{
+		if(this.empty())
+		{
+			return null;
+		}
+		RBNode currentNode = root;
+		while(-1 != currentNode.right.key)
+		{
+			currentNode = currentNode.right;
+		}
+		return currentNode.value;
+	}
 
 //************************************************************************************
   /**
@@ -225,6 +466,7 @@ public class RBTree {
 	  return valuesArr;
   }
 
+//************************************************************************************   
    /**
     * public int size()
     *
@@ -293,7 +535,7 @@ public class RBTree {
 
 //************************************************************************************  
    /**
-    * public int findPosition()
+    * public int getNodeWithKey()
     * @ param 
     * 	root: the node to start the search from
     * 	requiredKey: the key of the node the user request to be found.
@@ -301,10 +543,10 @@ public class RBTree {
     *	A Red Black tree node that has the specified key, null if no such node
     *	exists
     */
-  public RBNode findPosition(RBNode root, int requiredKey)
+  public RBNode getNodeWithKey(RBNode root, int requiredKey)
   {
 	  RBNode currentNode = root;
-	  while(null != currentNode)
+	  while(-1 != currentNode.key)
 	   {
 		   if(requiredKey == currentNode.key)
 		   {
@@ -324,7 +566,7 @@ public class RBTree {
 
 //************************************************************************************
 /*
-	* TODO AVIV - document this.
+	* TODO AVIV - document this and add support for having a dummy child.
 */ 
   public int insertFixup(RBNode node)
   {
@@ -386,7 +628,7 @@ public class RBTree {
 
 //************************************************************************************
    /**
-    * public void rightRotate()
+    * private void rightRotate()
     * rotates right around the speicifed node
     * @ param 
     * 	node: the parnet in the intersection we want to rotate
@@ -401,7 +643,7 @@ public class RBTree {
 
 //************************************************************************************
   /**
-    * public void leftRotate()
+    * private void leftRotate()
     * rotates left around the speicifed node
     * @ param 
     * 	node: the node to rotate around
@@ -416,7 +658,7 @@ public class RBTree {
 
 //************************************************************************************
   /**
-    * public void makeLeftChild()
+    * private void makeLeftChild()
     * makes child the left child of the parent, overriding
     * any exising left child
     * @ param 
@@ -431,7 +673,7 @@ public class RBTree {
 
 //************************************************************************************
     /**
-    * public void makeRightChild()
+    * private void makeRightChild()
     * makes child the right child of the parent, overriding
     * any exising right child
     * @ param 
@@ -446,7 +688,7 @@ public class RBTree {
 
 //************************************************************************************
   /**
-    * public void replaceNodes()
+    * private void replaceNodes()
     * overrides nodeToReplace with replacingNode
     * maintains any pointers external entities had to the nodes.
     * @ param 
@@ -466,5 +708,28 @@ public class RBTree {
 			makeRightChild(nodeToReplace.parent, replacingNode);
 		}
 	}
+
+//************************************************************************************
+  /**
+    * private RBNode findMinimalNode()
+    * returnes an RBNode with the minimal key in the tree that origins at root
+    * @ param 
+    * 	root: the node to be refered as the root of the tree
+*/
+	private RBNode findMinimalNode(RBNode root)
+	{
+		RBNode currentNode = root;
+		if (-1 == root.key) 
+		{
+			return root;	
+		}
+		while(-1 != currentNode.left.key)
+		{
+			currentNode = currentNode.left;
+		}
+
+		return currentNode;
+	}
+	
 
 }
