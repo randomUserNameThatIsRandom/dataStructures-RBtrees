@@ -77,7 +77,7 @@ public class RBTree {
 	  }
 	  RBNode currentNode = root;
 
-	  while(null != currentNode)
+	  while(-1 != currentNode.key)
     {
       // if found the wanted node
 		  if(currentNode.key == k)
@@ -110,9 +110,13 @@ public class RBTree {
    */
    public int insert(int k, String v) {
 	   RBNode insertNode = new RBNode(k,v,true);
+	   insertNode.left = dummyNode;
+	   insertNode.right = dummyNode;
 	   
+	   // if the tree is empty insert as root
 	   if(this.empty())
 	   {
+		   insertNode.parent = dummyNode;
 		   this.root = insertNode;
 		   this.root.is_red = false;
 		   this.size++;
@@ -120,11 +124,14 @@ public class RBTree {
 	   }
 	   
 	   RBNode positionNode = getNodeWithKey(this.root, k);
+	   
+	   // if the node the key exists in the tree return -1
 	   if(positionNode.key == k)
 	   {
 		   return -1;
 	   }
 	   
+	   // insert the node as a leaf
 	   this.size++;
 	   insertNode.parent = positionNode;
 	   if(k < positionNode.key)
@@ -135,6 +142,8 @@ public class RBTree {
 	   {
 		   positionNode.right = insertNode;
 	   }
+	   
+	   // fix the RBTree to a valid state and return the number of color switches 
 	   return insertFixup(insertNode);
    }
 
@@ -488,7 +497,7 @@ public class RBTree {
     *
     * @ param 
     * root: a pointer to the tree's root node.
-    * arr:  an array which will eventually contain the result, should be large enought
+    * arr:  an array which will eventually contain the result, should be large enough
     *         to contain all keys.
     * index:  should be 0 when intialy invoked
     * 
@@ -565,65 +574,95 @@ public class RBTree {
   }
 
 //************************************************************************************
-/*
-	* TODO AVIV - document this and add support for having a dummy child.
-*/ 
+  /**
+   * public int insertFixup()
+   *
+   * fixes the RBTree to make it valid after insert.
+   * @ params
+   *	node: the node that requires the fix
+   * @ return
+   *	the number of color switches made.
+   */
   public int insertFixup(RBNode node)
   {
-	  int colorFlipsNum = 0;
+	  int colorSwitchesNum = 0;
+	  
+	  // while the parent of the red node is red we need to continue fixing
 	  while(node.parent != null && node.parent.is_red)
 	  {
+		  // the case where the node's parent is a left child
 		  if(node.parent == node.parent.parent.left)
 		  {
 			  RBNode uncleNode = node.parent.parent.right;
+			  // case 1: the node's uncle is red
 			  if(uncleNode.is_red)
 			  {
-				  colorFlipsNum += 3;
+				  // the parent and the uncle become black
+				  // the grandparent becomes red
+				  colorSwitchesNum += 3;
 				  node.parent.is_red = false;
 				  uncleNode.is_red = false;
 				  node.parent.parent.is_red = true;
 				  node = node.parent.parent;
 			  }
+			  
 			  else
 			  {
+				  // case 2: the node's uncle is black and the node is a right child
 				  if(node == node.parent.right)
 				  {
+					  // use a left rotation to get to case 3
 					  node = node.parent;
 					  leftRotate(node);
 				  }
-				  colorFlipsNum += 2;
+				  
+				  // case 3: the node's uncle is black and the node is a left child
+				  // the parent becomes black and the grandparent too
+				  // use a right rotation on the node's parent to resolve height issues
+				  colorSwitchesNum += 2;
 				  node.parent.is_red = false;
 				  node.parent.parent.is_red = true;
 				  rightRotate(node.parent.parent);
 			  }
 		  }
+		  
+		  // the symmetric case where the node's parent is a right child
 		  else
 		  {
 			  RBNode uncleNode = node.parent.parent.left;
+			  // case 1: the node's uncle is red
 			  if(uncleNode.is_red)
 			  {
-				  colorFlipsNum += 3;
+				  // the parent and the uncle become black
+				  // the grandparent becomes red
+				  colorSwitchesNum += 3;
 				  node.parent.is_red = false;
 				  uncleNode.is_red = false;
 				  node.parent.parent.is_red = true;
 				  node = node.parent.parent;
 			  }
+			  
 			  else
 			  {
+				  // case 2: the node's uncle is black and the node is a left child
 				  if(node == node.parent.left)
 				  {
+					  // use a right rotation to get to case 3
 					  node = node.parent;
 					  rightRotate(node);
 				  }
-				  colorFlipsNum += 2;
+				  // case 3: the node's uncle is black and the node is a right child
+				  // the parent becomes black and the grandparent too
+				  // use a left rotation on the node's parent to resolve height issues
+				  colorSwitchesNum += 2;
 				  node.parent.is_red = false;
 				  node.parent.parent.is_red = true;
 				  leftRotate(node.parent.parent);
 			  }
 		  }
 	  }
-	  //T.left.color = BLACK??
-	  return colorFlipsNum;
+	  
+	  return colorSwitchesNum;
   }
 
 //************************************************************************************
