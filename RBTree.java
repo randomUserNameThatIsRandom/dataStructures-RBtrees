@@ -1,3 +1,7 @@
+package data_structures;
+
+import java.io.PrintStream;
+
 /**
  *
  * RBTree
@@ -12,6 +16,14 @@ public class RBTree {
 	private RBNode root = null;
 	private int size = 0;
 	private final RBNode dummyNode = new RBNode(-1 ,"" , false);
+	
+	void printTree() {
+        printTree(System.out);
+    }
+	
+	void printTree(PrintStream stream) {
+        root.printTree(stream);
+    }
 
 /**
    * public class RBNode
@@ -24,6 +36,51 @@ public class RBTree {
 	  	private RBNode parent;
 	  	private boolean is_red;
 	  	
+	  	public void printTree() {
+	        printTree(System.out);
+	    }
+
+	    public void printTree(PrintStream out) {
+	        if (right != dummyNode) {
+	            right.printTree(out, true, "");
+	        }
+	        printNodeValue(out);
+	        if (left != dummyNode) {
+	            left.printTree(out, false, "");
+	        }
+	    }
+	    
+	    private void printNodeValue(PrintStream out) {
+	        out.print(toStringMinimal() + '\n');
+	    }
+
+	    private void printTree(PrintStream out, boolean isRight, String indent) {
+	        if (right != dummyNode) {
+	            right.printTree(out, true, indent + (isRight ? "        " : " |      "));
+	        }
+	        out.print(indent);
+	        if (isRight) {
+	            out.print(" /");
+	        } else {
+	            out.print(" \\");
+	        }
+	        out.print("----- ");
+	        out.print(toStringMinimal() + '\n');
+	        if (left != dummyNode) {
+	            left.printTree(out, false, indent + (isRight ? " |      " : "        "));
+	        }
+	    }
+	    
+	    public String toStringMinimal(){
+			if (this == dummyNode)
+				return "Sentinal";
+			
+			if (!this.is_red)
+				return Integer.toString(key);
+			return "<" + Integer.toString(key) + ">";
+			
+		}
+	  	
 	  	RBNode(int key, String value, boolean is_red){
 	  		this.key = key;
 	  		this.value = value;
@@ -35,6 +92,7 @@ public class RBTree {
 		boolean isRed(){ return is_red;}
 		RBNode getLeft(){return left;}
 		RBNode getRight(){return right;}
+		RBNode getParent(){return parent;}
 		String getValue(){return value;}
 		int getKey(){return key;}
 	}
@@ -563,10 +621,18 @@ public class RBTree {
 		   }
 		   else if(requiredKey < currentNode.key)
 		   {
+			   if(currentNode.left == dummyNode)
+			   {
+				   return currentNode;
+			   }
 			   currentNode = currentNode.left;
 		   }
 		   else
 		   {
+			   if(currentNode.right == dummyNode)
+			   {
+				   return currentNode;
+			   }
 			   currentNode = currentNode.right;
 		   }
 	   }
@@ -588,7 +654,7 @@ public class RBTree {
 	  int colorSwitchesNum = 0;
 	  
 	  // while the parent of the red node is red we need to continue fixing
-	  while(node.parent != null && node.parent.is_red)
+	  while(node != dummyNode && node.parent != dummyNode && node.parent.is_red)
 	  {
 		  // the case where the node's parent is a left child
 		  if(node.parent == node.parent.parent.left)
@@ -662,6 +728,12 @@ public class RBTree {
 		  }
 	  }
 	  
+	  // if the root became red we need to change it back
+	  if(root.is_red)
+	  {
+		  root.is_red = false;
+		  colorSwitchesNum++;
+	  }
 	  return colorSwitchesNum;
   }
 
@@ -675,6 +747,12 @@ public class RBTree {
   private void rightRotate(RBNode node)
   {
 	  RBNode leftNode = node.left;
+	  // if the node we are rotating is the root
+	  // change the root to be its left child
+	  if(node == root)
+	  {
+		  root = leftNode;
+	  }
 	  replaceNodes(node, leftNode);
 	  makeLeftChild(node, leftNode.right);
 	  makeRightChild(leftNode, node);
@@ -690,6 +768,12 @@ public class RBTree {
   private void leftRotate(RBNode node)
   {
 	  RBNode rightNode = node.right;
+	  // if the node we are rotating is the root
+	  // change the root to be its right child
+	  if(node == root)
+	  {
+		  root = rightNode;
+	  }
 	  replaceNodes(node, rightNode);
 	  makeRightChild(node, rightNode.left);
 	  makeLeftChild(rightNode, node);
