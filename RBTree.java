@@ -296,7 +296,7 @@ public class RBTree {
 				if(!doubleBlackNodeParent.is_red)
 				{
 					doubleBlackNodeSibling.is_red = true;
-					return (1 + fixDeleteDoubleBlack(doubleBlackNodeParent))	
+					return (1 + fixDeleteDoubleBlack(doubleBlackNodeParent));
 				}
 				// if the parent is red
 				else
@@ -314,8 +314,8 @@ public class RBTree {
 				{
 					if (isDoubleBlackNodeLeftChild) 
 					{
-						int colorFlipsNum = 0
-						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
+						int colorFlipsNum = 0;
+						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red) 
 						{
 							colorFlipsNum++;
 						}
@@ -334,8 +334,8 @@ public class RBTree {
 					// TODO - is there a simpler way to do this one? this is an ajacent cace I deduced.
 					else
 					{
-						int colorFlipsNum = 0
-						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
+						int colorFlipsNum = 0;
+						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red) 
 						{
 							colorFlipsNum++;
 						}
@@ -350,8 +350,8 @@ public class RBTree {
 						if (newPossibleDoubleBlack.is_red) 
 						{
 							newPossibleDoubleBlack.is_red = false;
-							++colorFlipsNum	
-							return(colorFlipsNum)
+							++colorFlipsNum;
+							return(colorFlipsNum);
 						}
 						return(colorFlipsNum + fixDeleteDoubleBlack(newPossibleDoubleBlack));
 					}
@@ -370,8 +370,8 @@ public class RBTree {
 					// if the double black node is a right child.
 					else
 					{
-						int colorFlipsNum = 0
-						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
+						int colorFlipsNum = 0;
+						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red) 
 						{
 							colorFlipsNum++;
 						}
@@ -408,9 +408,6 @@ public class RBTree {
 			}
 		}
 
-		// make sure we don't get here
-		// TODO - remove this when we finish debuging.
-		assert(false);
 	}
 
 //************************************************************************************
@@ -430,11 +427,11 @@ public class RBTree {
 		{
 			if (isNodeLeftChild) 
 			{
-				nodeToDeleteParent.left = dummy;	
+				nodeToDelete.parent.left = dummyNode;	
 			}
 			else
 			{
-				nodeToDeleteParent.right = dummy;		
+				nodeToDelete.parent.right = dummyNode;		
 			}
 		}
 		// if the node has one child
@@ -450,11 +447,11 @@ public class RBTree {
 			// make nodeToDelete's child the child of nodeToDelete's parent. 
 			if (isNodeLeftChild) 
 			{
-				nodeToDelete.parent.left = nodeToDeleteChild	
+				nodeToDelete.parent.left = nodeToDeleteChild;
 			}
 			else
 			{
-				nodeToDelete.parent.right = nodeToDeleteChild		
+				nodeToDelete.parent.right = nodeToDeleteChild;
 			}
 
 		}
