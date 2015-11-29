@@ -239,7 +239,7 @@ public class RBTree {
 			nodeToDelete = nodeToReplaceWith;
 		}
 
-		// by the time we get here nodeToDelete has only one child that is not a dummy.
+		// by the time we get here nodeToDelete has up to one child that is not a dummy.
 		if (nodeToDelete.is_red) // if the node is red than the tree will be valid after removing it.
 		{
 			removeNodeWithUpToOneChild(nodeToDelete);
@@ -247,8 +247,8 @@ public class RBTree {
 		}
 
 		// the node we want to delete is black.
-
 		RBNode nodeToDeleteChild = nodeToDelete.right;
+		RBNode nodeToDeleteParent = nodeToDelete.parent;
 		if (-1 == nodeToDeleteChild.key) 
 		{
 			nodeToDeleteChild = nodeToDelete.left;
@@ -262,6 +262,12 @@ public class RBTree {
 
 		// the node we want to delete is black and it has a black child.
 		removeNodeWithUpToOneChild(nodeToDelete);
+		if (-1 == nodeToDeleteChild.key) 
+		{
+			nodeToDeleteChild.parent = nodeToDeleteParent;
+			nodeToDelete.left = null;
+			nodeToDelete.right = null;
+		}
 		return(fixDeleteDoubleBlack(nodeToDeleteChild));
 
    }
@@ -278,6 +284,22 @@ public class RBTree {
    */
 	private int fixDeleteDoubleBlack(RBNode doubleBlackNode)
 	{
+		//this.printTree();
+		//System.out.println("");
+		
+		// if this is the root with the double black issue.
+		if (-1 == doubleBlackNode.parent.key) 
+		{
+			// in this case there is no actual problem.
+			return 0;
+		}
+		
+		if (doubleBlackNode.is_red) 
+		{
+			doubleBlackNode.is_red = false;
+			return 1;
+		}
+		
 		RBNode doubleBlackNodeSibling = doubleBlackNode.parent.left;
 		if (doubleBlackNodeSibling == doubleBlackNode) 
 		{
@@ -287,7 +309,7 @@ public class RBTree {
 		boolean isDoubleBlackNodeLeftChild = (doubleBlackNode.parent.left == doubleBlackNode);
 
 		// if the sibling and the node with the problem are black
-		if (!doubleBlackNode.is_red && !doubleBlackNodeSibling.is_red) 
+		if (!doubleBlackNode.is_red && !doubleBlackNodeSibling.is_red)
 		{
 			// if both of the sibling's children are black
 			if (!doubleBlackNodeSibling.right.is_red && !doubleBlackNodeSibling.left.is_red) 
