@@ -1,3 +1,7 @@
+package data_structures;
+
+import java.io.PrintStream;
+
 /**
  *
  * RBTree
@@ -12,6 +16,14 @@ public class RBTree {
 	private RBNode root = null;
 	private int size = 0;
 	private final RBNode dummyNode = new RBNode(-1 ,"" , false);
+	
+	void printTree() {
+        printTree(System.out);
+    }
+	
+	void printTree(PrintStream stream) {
+        root.printTree(stream);
+    }
 
 /**
    * public class RBNode
@@ -24,6 +36,51 @@ public class RBTree {
 	  	private RBNode parent;
 	  	private boolean is_red;
 	  	
+	  	public void printTree() {
+	        printTree(System.out);
+	    }
+
+	    public void printTree(PrintStream out) {
+	        if (right != dummyNode) {
+	            right.printTree(out, true, "");
+	        }
+	        printNodeValue(out);
+	        if (left != dummyNode) {
+	            left.printTree(out, false, "");
+	        }
+	    }
+	    
+	    private void printNodeValue(PrintStream out) {
+	        out.print(toStringMinimal() + '\n');
+	    }
+
+	    private void printTree(PrintStream out, boolean isRight, String indent) {
+	        if (right != dummyNode) {
+	            right.printTree(out, true, indent + (isRight ? "        " : " |      "));
+	        }
+	        out.print(indent);
+	        if (isRight) {
+	            out.print(" /");
+	        } else {
+	            out.print(" \\");
+	        }
+	        out.print("----- ");
+	        out.print(toStringMinimal() + '\n');
+	        if (left != dummyNode) {
+	            left.printTree(out, false, indent + (isRight ? " |      " : "        "));
+	        }
+	    }
+	    
+	    public String toStringMinimal(){
+			if (this == dummyNode)
+				return "Sentinal";
+			
+			if (!this.is_red)
+				return Integer.toString(key);
+			return "<" + Integer.toString(key) + ">";
+			
+		}
+	  	
 	  	RBNode(int key, String value, boolean is_red){
 	  		this.key = key;
 	  		this.value = value;
@@ -35,6 +92,7 @@ public class RBTree {
 		boolean isRed(){ return is_red;}
 		RBNode getLeft(){return left;}
 		RBNode getRight(){return right;}
+		RBNode getParent(){return parent;}
 		String getValue(){return value;}
 		int getKey(){return key;}
 	}
@@ -157,56 +215,56 @@ public class RBTree {
    * returns the number of color switches, or 0 if no color switches were needed.
    * returns -1 if an item with key k was not found in the tree.
    */
-   public int delete(int k)
-   {
-		RBNode nodeToDelete = getNodeWithKey(this.root, k);
-		
-		// the node we are requested to delete is not in the tree
-		if(null == nodeToDelete)
-		{
-			return -1;
-		}
-
-		this.size -= 1;
-
-		// if the node has both children
-		if (-1 != nodeToDelete.left.key && -1 != nodeToDelete.right.key)
-		{
-			// delete the minimal node in the right subtree.
-			RBNode nodeToReplaceWith = findMinimalNode(nodeToDelete.right);
-
-			// node to replace with doesn't have a left child.
-			nodeToDelete.key = nodeToReplaceWith.key;
-			nodeToDelete.value = nodeToReplaceWith.value;
-			nodeToDelete = nodeToReplaceWith;
-		}
-
-		// by the time we get here nodeToDelete has only one child that is not a dummy.
-		if (nodeToDelete.is_red) // if the node is red than the tree will be valid after removing it.
-		{
-			removeNodeWithUpToOneChild(nodeToDelete);
-			return 0;	
-		}
-
-		// the node we want to delete is black.
-
-		RBNode nodeToDeleteChild = nodeToDelete.right;
-		if (-1 == nodeToDeleteChild.key) 
-		{
-			nodeToDeleteChild = nodeToDelete.left;
-		}
-		if (nodeToDeleteChild.is_red) 
-		{
-			nodeToDeleteChild.is_red = false;
-			removeNodeWithUpToOneChild(nodeToDelete);
-			return 1;		
-		}
-
-		// the node we want to delete is black and it has a black child.
-		removeNodeWithUpToOneChild(nodeToDelete);
-		return(fixDeleteDoubleBlack(nodeToDeleteChild));
-
-   }
+//   public int delete(int k)
+//   {
+//		RBNode nodeToDelete = getNodeWithKey(this.root, k);
+//		
+//		// the node we are requested to delete is not in the tree
+//		if(null == nodeToDelete)
+//		{
+//			return -1;
+//		}
+//
+//		this.size -= 1;
+//
+//		// if the node has both children
+//		if (-1 != nodeToDelete.left.key && -1 != nodeToDelete.right.key)
+//		{
+//			// delete the minimal node in the right subtree.
+//			RBNode nodeToReplaceWith = findMinimalNode(nodeToDelete.right);
+//
+//			// node to replace with doesn't have a left child.
+//			nodeToDelete.key = nodeToReplaceWith.key;
+//			nodeToDelete.value = nodeToReplaceWith.value;
+//			nodeToDelete = nodeToReplaceWith;
+//		}
+//
+//		// by the time we get here nodeToDelete has only one child that is not a dummy.
+//		if (nodeToDelete.is_red) // if the node is red than the tree will be valid after removing it.
+//		{
+//			removeNodeWithUpToOneChild(nodeToDelete);
+//			return 0;	
+//		}
+//
+//		// the node we want to delete is black.
+//
+//		RBNode nodeToDeleteChild = nodeToDelete.right;
+//		if (-1 == nodeToDeleteChild.key) 
+//		{
+//			nodeToDeleteChild = nodeToDelete.left;
+//		}
+//		if (nodeToDeleteChild.is_red) 
+//		{
+//			nodeToDeleteChild.is_red = false;
+//			removeNodeWithUpToOneChild(nodeToDelete);
+//			return 1;		
+//		}
+//
+//		// the node we want to delete is black and it has a black child.
+//		removeNodeWithUpToOneChild(nodeToDelete);
+//		return(fixDeleteDoubleBlack(nodeToDeleteChild));
+//
+//   }
 	//************************************************************************************
 	/**
    * public int fixDeleteDoubleBlack(int k)
@@ -218,142 +276,142 @@ public class RBTree {
    * @ return
    *	the number of color changes made.
    */
-	private int fixDeleteDoubleBlack(RBNode doubleBlackNode)
-	{
-		RBNode doubleBlackNodeSibling = doubleBlackNode.parent.left;
-		if (doubleBlackNodeSibling == doubleBlackNode) 
-		{
-			doubleBlackNodeSibling = doubleBlackNode.parent.right;	
-		}
-		RBNode doubleBlackNodeParent = doubleBlackNode.parent;
-		boolean isDoubleBlackNodeLeftChild = (doubleBlackNode.parent.left == doubleBlackNode);
-
-		// if the sibling and the node with the problem are black
-		if (!doubleBlackNode.is_red && !doubleBlackNodeSibling.is_red) 
-		{
-			// if both of the sibling's children are black
-			if (!doubleBlackNodeSibling.right.is_red && !doubleBlackNodeSibling.left.is_red) 
-			{
-				// if the parent is black
-				if(!doubleBlackNodeParent.is_red)
-				{
-					doubleBlackNodeSibling.is_red = true;
-					return (1 + fixDeleteDoubleBlack(doubleBlackNodeParent))	
-				}
-				// if the parent is red
-				else
-				{
-					doubleBlackNodeParent.is_red = false;
-					doubleBlackNodeSibling.is_red = true;
-					return 2;
-				}
-			}
-			// at least one of the sibling's children is red
-			else
-			{	
-				// if the sibling's right child is red (case 3)
-				if (doubleBlackNodeSibling.right.is_red) 
-				{
-					if (isDoubleBlackNodeLeftChild) 
-					{
-						int colorFlipsNum = 0
-						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
-						{
-							colorFlipsNum++;
-						}
-						if (doubleBlackNodeParent.is_red) 
-						{
-							colorFlipsNum++;	
-						}
-
-						doubleBlackNodeSibling.is_red = doubleBlackNodeParent.is_red;
-						doubleBlackNodeParent.is_red = false;
-						doubleBlackNodeSibling.right.is_red = false;		
-						leftRotate(doubleBlackNode.parent);	
-						return (colorFlipsNum + 1);
-					}
-					// if the double black node is a right child.
-					// TODO - is there a simpler way to do this one? this is an ajacent cace I deduced.
-					else
-					{
-						int colorFlipsNum = 0
-						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
-						{
-							colorFlipsNum++;
-						}
-						if (doubleBlackNodeParent.is_red) 
-						{
-							colorFlipsNum++;	
-						}
-						doubleBlackNodeSibling.is_red = doubleBlackNodeParent.is_red;
-						doubleBlackNodeParent.is_red = false;
-						RBNode newPossibleDoubleBlack = doubleBlackNodeSibling.left;
-						rightRotate(doubleBlackNodeParent);
-						if (newPossibleDoubleBlack.is_red) 
-						{
-							newPossibleDoubleBlack.is_red = false;
-							++colorFlipsNum	
-							return(colorFlipsNum)
-						}
-						return(colorFlipsNum + fixDeleteDoubleBlack(newPossibleDoubleBlack));
-					}
-				}
-				// the siblig's left child is red and we can assume that the right one is black
-				// other wise we would have been in case 3 (case 4)
-				else 
-				{
-					if (isDoubleBlackNodeLeftChild) 
-					{
-						doubleBlackNodeSibling.left.is_red = false;
-						doubleBlackNodeSibling.is_red = true;
-						rightRotate(doubleBlackNodeSibling);
-						return(2 + fixDeleteDoubleBlack(doubleBlackNode));
-					}
-					// if the double black node is a right child.
-					else
-					{
-						int colorFlipsNum = 0
-						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
-						{
-							colorFlipsNum++;
-						}
-						if (doubleBlackNodeParent.is_red) 
-						{
-							colorFlipsNum++;	
-						}
-						doubleBlackNodeSibling.is_red = doubleBlackNodeParent.is_red;
-						doubleBlackNodeParent.is_red = false;
-						doubleBlackNodeSibling.left.is_red = false;
-						rightRotate(doubleBlackNodeParent);
-						return(colorFlipsNum + 1);
-					}
-				}
-			}
-		}
-		// if only the problematic node is black and it's sibling is red.
-		else
-		{
-			if (isDoubleBlackNodeLeftChild) 
-			{
-				doubleBlackNodeSibling.is_red = false;
-				doubleBlackNodeParent.is_red = true;
-				leftRotate(doubleBlackNodeParent);
-				return(2 + fixDeleteDoubleBlack(doubleBlackNode));
-			}
-			// if the double black node is a right child.
-			else
-			{
-				doubleBlackNodeSibling.is_red = false;
-				doubleBlackNodeParent.is_red = true;
-				rightRotate(doubleBlackNodeParent);
-				return(2 + fixDeleteDoubleBlack(doubleBlackNode));
-			}
-		}
-
-		// make sure we don't get here
-		// TODO - remove this when we finish debuging.
-		assert(false);
-	}
+//	private int fixDeleteDoubleBlack(RBNode doubleBlackNode)
+//	{
+//		RBNode doubleBlackNodeSibling = doubleBlackNode.parent.left;
+//		if (doubleBlackNodeSibling == doubleBlackNode) 
+//		{
+//			doubleBlackNodeSibling = doubleBlackNode.parent.right;	
+//		}
+//		RBNode doubleBlackNodeParent = doubleBlackNode.parent;
+//		boolean isDoubleBlackNodeLeftChild = (doubleBlackNode.parent.left == doubleBlackNode);
+//
+//		// if the sibling and the node with the problem are black
+//		if (!doubleBlackNode.is_red && !doubleBlackNodeSibling.is_red) 
+//		{
+//			// if both of the sibling's children are black
+//			if (!doubleBlackNodeSibling.right.is_red && !doubleBlackNodeSibling.left.is_red) 
+//			{
+//				// if the parent is black
+//				if(!doubleBlackNodeParent.is_red)
+//				{
+//					doubleBlackNodeSibling.is_red = true;
+//					return (1 + fixDeleteDoubleBlack(doubleBlackNodeParent))	
+//				}
+//				// if the parent is red
+//				else
+//				{
+//					doubleBlackNodeParent.is_red = false;
+//					doubleBlackNodeSibling.is_red = true;
+//					return 2;
+//				}
+//			}
+//			// at least one of the sibling's children is red
+//			else
+//			{	
+//				// if the sibling's right child is red (case 3)
+//				if (doubleBlackNodeSibling.right.is_red) 
+//				{
+//					if (isDoubleBlackNodeLeftChild) 
+//					{
+//						int colorFlipsNum = 0
+//						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
+//						{
+//							colorFlipsNum++;
+//						}
+//						if (doubleBlackNodeParent.is_red) 
+//						{
+//							colorFlipsNum++;	
+//						}
+//
+//						doubleBlackNodeSibling.is_red = doubleBlackNodeParent.is_red;
+//						doubleBlackNodeParent.is_red = false;
+//						doubleBlackNodeSibling.right.is_red = false;		
+//						leftRotate(doubleBlackNode.parent);	
+//						return (colorFlipsNum + 1);
+//					}
+//					// if the double black node is a right child.
+//					// TODO - is there a simpler way to do this one? this is an ajacent cace I deduced.
+//					else
+//					{
+//						int colorFlipsNum = 0
+//						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
+//						{
+//							colorFlipsNum++;
+//						}
+//						if (doubleBlackNodeParent.is_red) 
+//						{
+//							colorFlipsNum++;	
+//						}
+//						doubleBlackNodeSibling.is_red = doubleBlackNodeParent.is_red;
+//						doubleBlackNodeParent.is_red = false;
+//						RBNode newPossibleDoubleBlack = doubleBlackNodeSibling.left;
+//						rightRotate(doubleBlackNodeParent);
+//						if (newPossibleDoubleBlack.is_red) 
+//						{
+//							newPossibleDoubleBlack.is_red = false;
+//							++colorFlipsNum	
+//							return(colorFlipsNum)
+//						}
+//						return(colorFlipsNum + fixDeleteDoubleBlack(newPossibleDoubleBlack));
+//					}
+//				}
+//				// the siblig's left child is red and we can assume that the right one is black
+//				// other wise we would have been in case 3 (case 4)
+//				else 
+//				{
+//					if (isDoubleBlackNodeLeftChild) 
+//					{
+//						doubleBlackNodeSibling.left.is_red = false;
+//						doubleBlackNodeSibling.is_red = true;
+//						rightRotate(doubleBlackNodeSibling);
+//						return(2 + fixDeleteDoubleBlack(doubleBlackNode));
+//					}
+//					// if the double black node is a right child.
+//					else
+//					{
+//						int colorFlipsNum = 0
+//						if (doubleBlackNodeSibling.is_red != doubleBlackNodeParent.is_red;) 
+//						{
+//							colorFlipsNum++;
+//						}
+//						if (doubleBlackNodeParent.is_red) 
+//						{
+//							colorFlipsNum++;	
+//						}
+//						doubleBlackNodeSibling.is_red = doubleBlackNodeParent.is_red;
+//						doubleBlackNodeParent.is_red = false;
+//						doubleBlackNodeSibling.left.is_red = false;
+//						rightRotate(doubleBlackNodeParent);
+//						return(colorFlipsNum + 1);
+//					}
+//				}
+//			}
+//		}
+//		// if only the problematic node is black and it's sibling is red.
+//		else
+//		{
+//			if (isDoubleBlackNodeLeftChild) 
+//			{
+//				doubleBlackNodeSibling.is_red = false;
+//				doubleBlackNodeParent.is_red = true;
+//				leftRotate(doubleBlackNodeParent);
+//				return(2 + fixDeleteDoubleBlack(doubleBlackNode));
+//			}
+//			// if the double black node is a right child.
+//			else
+//			{
+//				doubleBlackNodeSibling.is_red = false;
+//				doubleBlackNodeParent.is_red = true;
+//				rightRotate(doubleBlackNodeParent);
+//				return(2 + fixDeleteDoubleBlack(doubleBlackNode));
+//			}
+//		}
+//
+//		// make sure we don't get here
+//		// TODO - remove this when we finish debuging.
+//		assert(false);
+//	}
 
 //************************************************************************************
     /**
@@ -364,43 +422,43 @@ public class RBTree {
     * @ param 
     * nodeToDelete: a pointer to the node to remove
     */
-   private void removeNodeWithUpToOneChild(RBNode nodeToDelete)
-   {
-   		boolean isNodeLeftChild = (nodeToDelete.parent.left == nodeToDelete);
-   		// if the node has no children
-		if (-1 == nodeToDelete.left.key && -1 == nodeToDelete.right.key) 
-		{
-			if (isNodeLeftChild) 
-			{
-				nodeToDeleteParent.left = dummy;	
-			}
-			else
-			{
-				nodeToDeleteParent.right = dummy;		
-			}
-		}
-		// if the node has one child
-		else if ((-1 == nodeToDelete.right.key) || (-1 == nodeToDelete.left.key)) 
-		{
-			RBNode nodeToDeleteChild = nodeToDelete.right;
-			if (-1 == nodeToDeleteChild.key) 
-			{
-				nodeToDeleteChild = nodeToDelete.left;
-			}
-			nodeToDeleteChild.parent = nodeToDelete.parent;
-
-			// make nodeToDelete's child the child of nodeToDelete's parent. 
-			if (isNodeLeftChild) 
-			{
-				nodeToDelete.parent.left = nodeToDeleteChild	
-			}
-			else
-			{
-				nodeToDelete.parent.right = nodeToDeleteChild		
-			}
-
-		}
-   }
+//   private void removeNodeWithUpToOneChild(RBNode nodeToDelete)
+//   {
+//   		boolean isNodeLeftChild = (nodeToDelete.parent.left == nodeToDelete);
+//   		// if the node has no children
+//		if (-1 == nodeToDelete.left.key && -1 == nodeToDelete.right.key) 
+//		{
+//			if (isNodeLeftChild) 
+//			{
+//				nodeToDeleteParent.left = dummy;	
+//			}
+//			else
+//			{
+//				nodeToDeleteParent.right = dummy;		
+//			}
+//		}
+//		// if the node has one child
+//		else if ((-1 == nodeToDelete.right.key) || (-1 == nodeToDelete.left.key)) 
+//		{
+//			RBNode nodeToDeleteChild = nodeToDelete.right;
+//			if (-1 == nodeToDeleteChild.key) 
+//			{
+//				nodeToDeleteChild = nodeToDelete.left;
+//			}
+//			nodeToDeleteChild.parent = nodeToDelete.parent;
+//
+//			// make nodeToDelete's child the child of nodeToDelete's parent. 
+//			if (isNodeLeftChild) 
+//			{
+//				nodeToDelete.parent.left = nodeToDeleteChild	
+//			}
+//			else
+//			{
+//				nodeToDelete.parent.right = nodeToDeleteChild		
+//			}
+//
+//		}
+//   }
 
 //************************************************************************************
    /**
@@ -563,10 +621,18 @@ public class RBTree {
 		   }
 		   else if(requiredKey < currentNode.key)
 		   {
+			   if(currentNode.left == dummyNode)
+			   {
+				   return currentNode;
+			   }
 			   currentNode = currentNode.left;
 		   }
 		   else
 		   {
+			   if(currentNode.right == dummyNode)
+			   {
+				   return currentNode;
+			   }
 			   currentNode = currentNode.right;
 		   }
 	   }
@@ -588,7 +654,7 @@ public class RBTree {
 	  int colorSwitchesNum = 0;
 	  
 	  // while the parent of the red node is red we need to continue fixing
-	  while(node.parent != null && node.parent.is_red)
+	  while(node != dummyNode && node.parent != dummyNode && node.parent.is_red)
 	  {
 		  // the case where the node's parent is a left child
 		  if(node.parent == node.parent.parent.left)
@@ -662,6 +728,12 @@ public class RBTree {
 		  }
 	  }
 	  
+	  // if the root became red we need to change it back
+	  if(root.is_red)
+	  {
+		  root.is_red = false;
+		  colorSwitchesNum++;
+	  }
 	  return colorSwitchesNum;
   }
 
@@ -675,6 +747,12 @@ public class RBTree {
   private void rightRotate(RBNode node)
   {
 	  RBNode leftNode = node.left;
+	  // if the node we are rotating is the root
+	  // change the root to be its left child
+	  if(node == root)
+	  {
+		  root = leftNode;
+	  }
 	  replaceNodes(node, leftNode);
 	  makeLeftChild(node, leftNode.right);
 	  makeRightChild(leftNode, node);
@@ -690,6 +768,12 @@ public class RBTree {
   private void leftRotate(RBNode node)
   {
 	  RBNode rightNode = node.right;
+	  // if the node we are rotating is the root
+	  // change the root to be its right child
+	  if(node == root)
+	  {
+		  root = rightNode;
+	  }
 	  replaceNodes(node, rightNode);
 	  makeRightChild(node, rightNode.left);
 	  makeLeftChild(rightNode, node);
