@@ -265,8 +265,8 @@ public class RBTree {
 		if (-1 == nodeToDeleteChild.key) 
 		{
 			nodeToDeleteChild.parent = nodeToDeleteParent;
-			nodeToDelete.left = null;
-			nodeToDelete.right = null;
+			nodeToDeleteChild.left = null;
+			nodeToDeleteChild.right = null;
 		}
 		return(fixDeleteDoubleBlack(nodeToDeleteChild));
 
@@ -375,6 +375,8 @@ public class RBTree {
 							++colorFlipsNum;
 							return(colorFlipsNum);
 						}
+						// fix the parent pointer in case this is a dummy
+						newPossibleDoubleBlack.parent = doubleBlackNodeSibling;
 						return(colorFlipsNum + fixDeleteDoubleBlack(newPossibleDoubleBlack));
 					}
 				}
@@ -387,6 +389,8 @@ public class RBTree {
 						doubleBlackNodeSibling.left.is_red = false;
 						doubleBlackNodeSibling.is_red = true;
 						rightRotate(doubleBlackNodeSibling);
+						// if double black node was a dummy rotate may have changed it's parent
+						doubleBlackNode.parent = doubleBlackNodeParent;
 						return(2 + fixDeleteDoubleBlack(doubleBlackNode));
 					}
 					// if the double black node is a right child.
@@ -418,6 +422,8 @@ public class RBTree {
 				doubleBlackNodeSibling.is_red = false;
 				doubleBlackNodeParent.is_red = true;
 				leftRotate(doubleBlackNodeParent);
+				// if double black node was a dummy rotate may have changed it's parent
+				doubleBlackNode.parent = doubleBlackNodeParent;
 				return(2 + fixDeleteDoubleBlack(doubleBlackNode));
 			}
 			// if the double black node is a right child.
@@ -426,6 +432,8 @@ public class RBTree {
 				doubleBlackNodeSibling.is_red = false;
 				doubleBlackNodeParent.is_red = true;
 				rightRotate(doubleBlackNodeParent);
+				// if double black node was a dummy rotate may have changed it's parent
+				doubleBlackNode.parent = doubleBlackNodeParent;
 				return(2 + fixDeleteDoubleBlack(doubleBlackNode));
 			}
 		}

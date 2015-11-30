@@ -20,49 +20,47 @@ public class mainTesting {
 	{
 
 		RBTree tree = new RBTree();
-		tree.insert(1, "1abcd");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
-		tree.insert(4,"4adsflk");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
-		tree.insert(5,"5adsfdsglk");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
-		tree.insert(86,"86adasdgsflk");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
-		tree.insert(35,"35adjhysflk");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
-		tree.insert(930,"930adshjmdflk");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
-		System.out.println("finished inserting");
+		insertAndValidate(tree,1 ,"1abcd" );
+		insertAndValidate(tree, 4,"4adsflk");
+		insertAndValidate(tree, 5,"5adsfdsglk");
+		insertAndValidate(tree, 86,"86adasdgsflk");
+		insertAndValidate(tree, 35,"35adjhysflk");
+		insertAndValidate(tree, 930,"930adshjmdflk");
+		insertAndValidate(tree, 86,"86adasdgsflk");
+		deleteAndValidate(tree, tree.getRoot().getKey());
+		deleteAndValidate(tree, 86);
+		deleteAndValidate(tree, 930);
+		deleteAndValidate(tree, 35);
+		insertAndValidate(tree, 83,"83adasdgsflk");
+		insertAndValidate(tree, 23,"23adasdgsflk");
 		tree.printTree();
-		System.out.println("1111111111");
-		tree.delete(tree.getRoot().getKey());
-		tree.printTree();
-		System.out.println("2222222222");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
-		tree.delete(86);
-		tree.printTree();
-		System.out.println("33333333333");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
-		tree.delete(930);
-		tree.printTree();
-		System.out.println("44444444444");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
-		tree.delete(35);
-		tree.printTree();
-		System.out.println("55555555555");
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
-		validateBlackRule(tree.getRoot());
+		deleteAndValidate(tree, 1);
+		insertAndValidate(tree, 213,"213adasdgsflk");
+		insertAndValidate(tree, 123,"123adasdgsflk");
+		insertAndValidate(tree, 392,"392");
+		deleteAndValidate(tree, 83);
+		deleteAndValidate(tree, 23);
+		deleteAndValidate(tree, 213);
+		deleteAndValidate(tree, 392);
 		
 		
+		
+	}
+	
+	private static void deleteAndValidate(RBTree tree, Integer key)
+	{
+		System.out.println("deleting " + key);
+		tree.delete(key);
+		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
+		validateBlackRule(tree.getRoot());
+	}
+	
+	private static void insertAndValidate(RBTree tree, Integer key, String value)
+	{
+		System.out.println("inserting " + key);
+		tree.insert(key, value);
+		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
+		validateBlackRule(tree.getRoot());
 	}
 	
 	private static boolean makeSureTreeIsValidBinarySearchTree(RBNode root)
