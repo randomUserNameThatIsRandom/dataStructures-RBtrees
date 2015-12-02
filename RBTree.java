@@ -181,7 +181,7 @@ public class RBTree {
 		   return 1;
 	   }
 	   
-	   RBNode positionNode = getNodeWithKey(this.root, k);
+	   RBNode positionNode = getLocationToInsertNodeAt(this.root, k);
 	   
 	   // if the node the key exists in the tree return -1
 	   if(positionNode.key == k)
@@ -589,13 +589,14 @@ public class RBTree {
     */
    public int generateKeysArray(RBNode root, int[] arr, int index)
    {
-      if(null == root)
+      if(-1 == root.key)
       {
         return index;
       }
 
       index = generateKeysArray(root.left, arr, index);
-      arr[index++] = root.key;
+      arr[index] = root.key;
+      index++;
       index = generateKeysArray(root.right, arr, index);
       return index;
    }
@@ -617,27 +618,53 @@ public class RBTree {
 
   public int generateValuesArray(RBNode root, String[] arr, int index)
   {
-    if(root == null)
+    if(-1 == root.key)
     {
       return index;
     }
+    
     index = generateValuesArray(root.left, arr, index);
-    arr[index++] = root.value;
+    arr[index] = root.value;
+    index++;
     index = generateValuesArray(root.right, arr, index);
     return index;
    }
 
-//************************************************************************************  
+//************************************************************************************
+  
+ // TODO - document this and getLocationToInsertNodeAt!
+  // getLocationToInsertNodeAt didn't have a logical name so it was split to two functions 
+  /**
+   * public RBNode getNodeWithKey()
+   * @ param 
+   * 	root: the node to start the search from
+   * 	requiredKey: the key of the node the user request to be found.
+	* @ return
+   *	A Red Black tree node that has the specified key, null if no such node
+   *	exists
+   */
+  public RBNode getNodeWithKey(RBNode root, int requiredKey)
+  {
+	  RBNode locationNode = getLocationToInsertNodeAt(root, requiredKey);
+	  if(requiredKey != locationNode.key)
+	  {
+		  return null;
+	  }
+	  return locationNode;
+  }
+  
+//************************************************************************************
    /**
-    * public int getNodeWithKey()
+    * public RBNode getLocationToInsertNodeAt()
     * @ param 
     * 	root: the node to start the search from
     * 	requiredKey: the key of the node the user request to be found.
 	* @ return
-    *	A Red Black tree node that has the specified key, null if no such node
+    *	A Red Black tree node that has the specified key, the parent of the node
+    *	had it been in the tree.
     *	exists
     */
-  public RBNode getNodeWithKey(RBNode root, int requiredKey)
+  public RBNode getLocationToInsertNodeAt(RBNode root, int requiredKey)
   {
 	  RBNode currentNode = root;
 	  while(-1 != currentNode.key)

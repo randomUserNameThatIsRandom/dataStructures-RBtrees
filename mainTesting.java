@@ -1,5 +1,6 @@
 package data_structures;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -10,12 +11,13 @@ import data_structures.RBTree.RBNode;
 public class mainTesting {
 	static Map<Integer, Integer> memoMap;
 	static Set<Integer> leafs;
+	static Map<Integer, String> expectedValuesInTree = new HashMap<Integer, String>();
 	static int blackHight = -1;
 	
 	public mainTesting() {
 		// TODO Auto-generated constructor stub
 	}
-
+//****************************************************************************************
 	public static void main(String[] args) 
 	{
 
@@ -42,34 +44,109 @@ public class mainTesting {
 		deleteAndValidate(tree, 23);
 		deleteAndValidate(tree, 213);
 		deleteAndValidate(tree, 392);
+		insertAndValidate(tree, 324,"35adjh63ysflk");
+		insertAndValidate(tree, 643,"930ads53hjmdflk");
+		deleteAndValidate(tree, 213);
+		insertAndValidate(tree, 1354,"86ada2sdgsflk");
+		insertAndValidate(tree, 13457,"35ad43j2hysflk");
+		insertAndValidate(tree, 2531,"930ad5shjmdflk");
+		insertAndValidate(tree, 8612243,"8623adasdgsflk");
+		deleteAndValidate(tree, 392);
+		deleteAndValidate(tree, 643);
+		insertAndValidate(tree, 3521,"35ad34jhysflk");
+		insertAndValidate(tree, 93540,"934360adshjmdflk");
+		deleteAndValidate(tree, 8612243);
+		insertAndValidate(tree, 84636,"86426adasdgsflk");
+		deleteAndValidate(tree, 1354);
+		deleteAndValidate(tree, tree.getRoot().getKey());
+		insertAndValidate(tree, 1252,"211253adasdgsflk");
+		insertAndValidate(tree, 5312,"12243adasdgsflk");
+		insertAndValidate(tree, 3921422,"392");
+		deleteAndValidate(tree, 84636);
+		insertAndValidate(tree, 1124252,"21121253adasdgsflk");
+		insertAndValidate(tree, 5423,"1253243adasdgsflk");
+		insertAndValidate(tree, 392121422,"352192");
+		insertAndValidate(tree, 125452,"21131253adasdgsflk");
+		insertAndValidate(tree, 535112,"1221243adasdgsflk");
+		insertAndValidate(tree, 392132422,"392");
+		insertAndValidate(tree, 125212,"211212553adasdgsflk");
+		insertAndValidate(tree, 1215,"5412243adasdgsflk");
+		insertAndValidate(tree, 392121422,"39332");
+		deleteAndValidate(tree, 5423);
+		deleteAndValidate(tree, 125212);
+		deleteAndValidate(tree, 392121422);
+		insertAndValidate(tree, 214125,"3521adjh63ysflk");
+		insertAndValidate(tree, 641253,"521542");
+		deleteAndValidate(tree, 3521);
+		deleteAndValidate(tree, 324);
+		deleteAndValidate(tree, 5);
+		deleteAndValidate(tree, 13457);
+		insertAndValidate(tree, 84636,"86426adasdgsflk");
+		tree.printTree();
 		
+		System.err.println("done");
 		
 		
 	}
-	
+//****************************************************************************************	
 	private static void deleteAndValidate(RBTree tree, Integer key)
 	{
 		System.out.println("deleting " + key);
+		expectedValuesInTree.remove(key);
 		tree.delete(key);
 		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
 		validateBlackRule(tree.getRoot());
+		assert(validateTreeValues(tree));
 	}
 	
+//****************************************************************************************	
 	private static void insertAndValidate(RBTree tree, Integer key, String value)
 	{
 		System.out.println("inserting " + key);
-		tree.insert(key, value);
+		int insertRet = tree.insert(key, value);
+		if(-1 != insertRet)
+		{
+			expectedValuesInTree.put(key, value);
+		}
 		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
 		validateBlackRule(tree.getRoot());
+		assert(validateTreeValues(tree));
 	}
 	
+//****************************************************************************************
+	private static boolean validateTreeValues(RBTree tree)
+	{
+		int[] keys = tree.keysToArray();
+		if (keys.length != expectedValuesInTree.size()) 
+		{
+			System.err.println("keys array length is " + keys.length + " while the expected length is: " + expectedValuesInTree.size());
+			return false;
+		}
+		String[] values = tree.valuesToArray();
+		for (int i = 0; i < keys.length; i++) 
+		{
+			String currentValue = expectedValuesInTree.get(keys[i]);
+			if (!values[i].equals(currentValue))
+			{
+				System.err.println("found wrong value "+ currentValue.toString() + " expected " + values[i].toString() + " for key "+ keys[i]);
+				return false;
+			}
+			
+		}
+		
+		return true;
+		
+		
+	}
+	
+//****************************************************************************************
 	private static boolean makeSureTreeIsValidBinarySearchTree(RBNode root)
 	{
 		if (-1 == root.getKey())
 		{
 			if (root.isRed()) 
 			{
-				System.out.println("We have a red dummy on our hands, that souldn't happen!");
+				System.err.println("We have a red dummy on our hands, that souldn't happen!");
 				return false;
 			}
 			
@@ -78,13 +155,13 @@ public class mainTesting {
 		
 		if (root != root.getLeft().getParent() && -1 != root.getLeft().getKey())
 		{
-			System.out.println("incorrect parrent for left child");
+			System.err.println("incorrect parrent for left child");
 			return false;
 		}
 		
 		if (root != root.getRight().getParent() && -1 != root.getRight().getKey())
 		{
-			System.out.println("incorrect parrent for right child");
+			System.err.println("incorrect parrent for right child");
 			return false;
 		}
 		
@@ -99,18 +176,18 @@ public class mainTesting {
 		// both are valid...
 		if ((root.getKey() < root.getLeft().getKey()) && (-1 != root.getLeft().getKey()))
 		{
-			System.out.println("tree is invalid");
+			System.err.println("tree is invalid");
 			return false;
 		}
 		if ((root.getKey() > root.getRight().getKey()) && (-1 != root.getRight().getKey()))
 		{
-			System.out.println("tree is invalid");
+			System.err.println("tree is invalid");
 			return false;
 		}
 		
 		return true;
 	}
-	
+//****************************************************************************************
 	private static void validateBlackRule(RBNode root)
 	{
 		memoMap = new HashMap<Integer, Integer>();
@@ -118,7 +195,7 @@ public class mainTesting {
 		blackHight = -1;
 		validateBlackRuleImp(root, -1);
 	}
-	
+//****************************************************************************************
 	private static void validateBlackRuleImp(RBNode root, int parentKey)
 	{
 		
@@ -139,7 +216,7 @@ public class mainTesting {
 			{
 				if (blackHight != memoMap.get(parentKey))
 				{
-					System.out.println("black hight mismatch");
+					System.err.println("black hight mismatch");
 					assert(false);
 				}
 			}
