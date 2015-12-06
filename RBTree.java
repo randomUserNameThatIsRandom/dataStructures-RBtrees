@@ -544,19 +544,17 @@ public class RBTree {
 
 //************************************************************************************
   /**
-   * TODO- this mehtod changed to return null if the tree is empty, reflect this in the document
-   * public int[] keysToArray()
-   *
    * Returns a sorted array which contains all keys in the tree,
-   * or null if the array is empty
+   * or an empty array if the tree is empty.
    */
   public int[] keysToArray()
   {
+	  int[] keysArr = new int[this.size];
 	  if (0 == this.size) 
 	  {
-		return null;
+		return keysArr;
 	  }
-	  int[] keysArr = new int[this.size];
+	  
 	  generateKeysArray(root, keysArr, 0);
 	  return keysArr;
   }
@@ -572,6 +570,10 @@ public class RBTree {
   public String[] valuesToArray()
   {
 	  String[] valuesArr = new String[size];
+	  if (0 == this.size) 
+	  {
+		return valuesArr;
+	  }
 	  generateValuesArray(root, valuesArr, 0);
 	  return valuesArr;
   }
@@ -662,6 +664,11 @@ public class RBTree {
   public RBNode getNodeWithKey(RBNode root, int requiredKey)
   {
 	  RBNode locationNode = getLocationToInsertNodeAt(root, requiredKey);
+	  if (null == locationNode) 
+	  {
+		return null;  
+	  }
+	  
 	  if(requiredKey != locationNode.key)
 	  {
 		  return null;

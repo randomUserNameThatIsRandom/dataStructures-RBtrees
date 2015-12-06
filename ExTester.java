@@ -285,7 +285,7 @@ public class ExTester {
 	}
 
 	public static void main(String[] args) {
-		int test_num = 2;
+		int test_num = 9;
 		TestRun test_runner = new TestRun(test_num);
 		Thread test_thread = new Thread(test_runner);
 		test_thread.start();
