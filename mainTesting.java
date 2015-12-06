@@ -23,9 +23,13 @@ public class mainTesting {
 
 		RBTree tree = new RBTree();
 		insertAndValidate(tree,1 ,"1abcd" );
+		deleteAndValidate(tree , 1);
 		insertAndValidate(tree, 4,"4adsflk");
 		insertAndValidate(tree, 5,"5adsfdsglk");
 		insertAndValidate(tree, 86,"86adasdgsflk");
+		deleteAndValidate(tree , 5);
+		deleteAndValidate(tree , 4);
+		deleteAndValidate(tree , 86);
 		insertAndValidate(tree, 35,"35adjhysflk");
 		insertAndValidate(tree, 930,"930adshjmdflk");
 		insertAndValidate(tree, 86,"86adasdgsflk");
@@ -89,18 +93,22 @@ public class mainTesting {
 		
 	}
 //****************************************************************************************	
-	private static void deleteAndValidate(RBTree tree, Integer key)
+	public static int deleteAndValidate(RBTree tree, Integer key)
 	{
 		System.out.println("deleting " + key);
 		expectedValuesInTree.remove(key);
-		tree.delete(key);
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
+		int deleteRet = tree.delete(key);
+		if(null != tree.getRoot())
+		{
+			assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));	
+		}
 		validateBlackRule(tree.getRoot());
 		assert(validateTreeValues(tree));
+		return deleteRet;
 	}
 	
 //****************************************************************************************	
-	private static void insertAndValidate(RBTree tree, Integer key, String value)
+	public static int insertAndValidate(RBTree tree, Integer key, String value)
 	{
 		System.out.println("inserting " + key);
 		int insertRet = tree.insert(key, value);
@@ -108,15 +116,23 @@ public class mainTesting {
 		{
 			expectedValuesInTree.put(key, value);
 		}
-		assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));
+		if(null != tree.getRoot())
+		{
+			assert(makeSureTreeIsValidBinarySearchTree(tree.getRoot()));	
+		}
 		validateBlackRule(tree.getRoot());
 		assert(validateTreeValues(tree));
+		return insertRet;
 	}
 	
 //****************************************************************************************
-	private static boolean validateTreeValues(RBTree tree)
+	public static boolean validateTreeValues(RBTree tree)
 	{
 		int[] keys = tree.keysToArray();
+		if (null == keys) 
+		{
+			return expectedValuesInTree.size() == 0;
+		}
 		if (keys.length != expectedValuesInTree.size()) 
 		{
 			System.err.println("keys array length is " + keys.length + " while the expected length is: " + expectedValuesInTree.size());
@@ -140,7 +156,7 @@ public class mainTesting {
 	}
 	
 //****************************************************************************************
-	private static boolean makeSureTreeIsValidBinarySearchTree(RBNode root)
+	public static boolean makeSureTreeIsValidBinarySearchTree(RBNode root)
 	{
 		if (-1 == root.getKey())
 		{
@@ -188,17 +204,21 @@ public class mainTesting {
 		return true;
 	}
 //****************************************************************************************
-	private static void validateBlackRule(RBNode root)
+	public static void validateBlackRule(RBNode root)
 	{
 		memoMap = new HashMap<Integer, Integer>();
 		leafs = new HashSet<Integer>();
 		blackHight = -1;
+		if (null == root)
+		{
+			return;
+		}
+		
 		validateBlackRuleImp(root, -1);
 	}
 //****************************************************************************************
-	private static void validateBlackRuleImp(RBNode root, int parentKey)
+	public static void validateBlackRuleImp(RBNode root, int parentKey)
 	{
-		
 		if(-1 == parentKey)
 		{
 			memoMap.put(root.getKey(), root.isRed() ? 0 : 1);

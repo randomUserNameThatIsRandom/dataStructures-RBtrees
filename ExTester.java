@@ -74,7 +74,7 @@ public class ExTester {
 		for (int i = 0; i < SIZE; i++) {
 			if ((intValue(rbTree.search(i)) == i) != myTree.contains(i))
 			{
-				System.out.println("bbbb");
+				System.out.println("bbbb " + i + " " + myTree.contains(i));
 				return false;
 			}
 		}
@@ -92,7 +92,7 @@ public class ExTester {
 
 	public static void insert(RBTree rbTree, MyTree myTree, int[] keys) {
 		for (int j = 0; j < keys.length; j++) {
-			rbTree.insert(keys[j],(""+keys[j]));
+			mainTesting.insertAndValidate(rbTree, keys[j],(""+keys[j]));
 			myTree.insert(keys[j]);
 		}
 	}
@@ -133,8 +133,8 @@ public class ExTester {
 		if (!checkAll(rbTree, myTree))
 			return false;
 
-		rbTree.insert(1, "1");
-		rbTree.delete(1);
+		mainTesting.insertAndValidate(rbTree, 1, "1");
+		mainTesting.deleteAndValidate(rbTree, 1);
 
 		return checkAll(rbTree, myTree);
 	}
@@ -144,7 +144,7 @@ public class ExTester {
 		MyTree myTree = new MyTree();
 		int[] keys = generateKeys();
 		for (int j = 0; j < keys.length; j++) {
-			rbTree.insert(keys[j],(""+keys[j]));
+			mainTesting.insertAndValidate(rbTree, keys[j],(""+keys[j]));
 			myTree.insert(keys[j]);
 			if (!checkSearch(rbTree, myTree))
 				return false;
@@ -158,7 +158,7 @@ public class ExTester {
 		int[] keys = generateKeys();
 		insert(rbTree, myTree, keys);
 		for (int j = 0; j < keys.length; j++) {
-			rbTree.delete(keys[j]);
+			mainTesting.deleteAndValidate(rbTree, keys[j]);
 			myTree.delete(keys[j]);
 			if (!checkSearch(rbTree, myTree))
 				return false;
@@ -171,7 +171,7 @@ public class ExTester {
 		MyTree myTree = new MyTree();
 		int[] keys = generateKeys();
 		for (int j = 0; j < keys.length; j++) {
-			rbTree.insert(keys[j],(""+keys[j]));
+			mainTesting.insertAndValidate(rbTree, keys[j],(""+keys[j]));
 			myTree.insert(keys[j]);
 			if (!checkMin(rbTree, myTree) || !checkMax(rbTree, myTree))
 				return false;
@@ -185,7 +185,7 @@ public class ExTester {
 		int[] keys = generateKeys();
 		insert(rbTree, myTree, keys);
 		for (int j = 0; j < keys.length; j++) {
-			rbTree.delete(keys[j]);
+			mainTesting.deleteAndValidate(rbTree, keys[j]);
 			myTree.delete(keys[j]);
 			if (!checkMin(rbTree, myTree) || !checkMax(rbTree, myTree))
 				return false;
@@ -198,7 +198,7 @@ public class ExTester {
 		MyTree myTree = new MyTree();
 		int[] keys = generateKeys();
 		for (int j = 0; j < keys.length; j++) {
-			rbTree.insert(keys[j],(""+keys[j]));
+			mainTesting.insertAndValidate(rbTree, keys[j],(""+keys[j]));
 			myTree.insert(keys[j]);
 			if (!checkSize(rbTree, myTree) || !checkEmpty(rbTree, myTree))
 				return false;
@@ -211,7 +211,7 @@ public class ExTester {
 		MyTree myTree = new MyTree();
 		int[] keys = generateKeys();
 		for (int j = 0; j < keys.length; j++) {
-			rbTree.insert(keys[j],(""+keys[j]));
+			mainTesting.insertAndValidate(rbTree, keys[j],(""+keys[j]));
 			myTree.insert(keys[j]);
 			if (!checkKeysArray(rbTree, myTree))
 				return false;
@@ -227,7 +227,7 @@ public class ExTester {
 		int[] keys = generateKeys();
 		insert(rbTree, myTree, keys);
 		for (int j = 0; j < keys.length; j++) {
-			rbTree.delete(keys[j]);
+			mainTesting.deleteAndValidate(rbTree, keys[j]);
 			myTree.delete(keys[j]);
 			if (!checkKeysArray(rbTree, myTree))
 				return false;
@@ -243,7 +243,7 @@ public class ExTester {
 		int[] keys = generateKeys();
 		insert(rbTree, myTree, keys);
 		for (int j = 0; j < keys.length; j++) {
-			if (rbTree.insert(keys[j],""+(-1)) != -1)
+			if (mainTesting.insertAndValidate(rbTree, keys[j],""+(-1)) != -1)
 				return false;
 			if (!checkSize(rbTree, myTree))
 				return false;
@@ -256,9 +256,9 @@ public class ExTester {
 		MyTree myTree = new MyTree();
 		int[] keys = generateKeys();
 		for (int j = 0; j < keys.length; j++) {
-			if (rbTree.delete(keys[j]) != -1)
+			if (mainTesting.deleteAndValidate(rbTree, keys[j]) != -1)
 				return false;
-			rbTree.insert(keys[j],(""+keys[j]));
+			mainTesting.insertAndValidate(rbTree, keys[j],(""+keys[j]));
 			myTree.insert(keys[j]);
 			if (!checkSize(rbTree, myTree))
 				return false;
@@ -290,11 +290,13 @@ public class ExTester {
 		Thread test_thread = new Thread(test_runner);
 		test_thread.start();
 		try {
-			test_thread.join(10000);
+			//test_thread.join(10000);
+			test_thread.join();
 			if (test_thread.isAlive())
 				System.out.println("Timeout on Test " + test_num);
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("Exception on Test " + test_num + " : " + e);
 		}
 		System.out.println("Result #" + test_num + ": " + test_runner.success);

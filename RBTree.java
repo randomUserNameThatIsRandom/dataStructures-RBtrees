@@ -444,7 +444,7 @@ public class RBTree {
     /**
     * private void removeNodeWithUpToOneChild
     *
-    * removes the specificed node from the tree
+    * removes the specified node from the tree
     *
     * @ param 
     * nodeToDelete: a pointer to the node to remove
@@ -462,6 +462,12 @@ public class RBTree {
 			else
 			{
 				nodeToDelete.parent.right = dummyNode;		
+			}
+			// if the node we have just deleted was the root update the root to be null
+			// as there are no longer any nodes in the tree.
+			if (-1 == nodeToDelete.parent.key)
+			{
+				root = null;
 			}
 		}
 		// if the node has one child
@@ -483,7 +489,12 @@ public class RBTree {
 			{
 				nodeToDelete.parent.right = nodeToDeleteChild;
 			}
-
+			
+			// update the root as it has just changed!
+			if (-1 == nodeToDelete.parent.key)
+			{
+				root = nodeToDeleteChild;
+			}
 		}
    }
 
@@ -533,13 +544,18 @@ public class RBTree {
 
 //************************************************************************************
   /**
+   * TODO- this mehtod changed to return null if the tree is empty, reflect this in the document
    * public int[] keysToArray()
    *
    * Returns a sorted array which contains all keys in the tree,
-   * or an empty array if the tree is empty.
+   * or null if the array is empty
    */
   public int[] keysToArray()
   {
+	  if (0 == this.size) 
+	  {
+		return null;
+	  }
 	  int[] keysArr = new int[this.size];
 	  generateKeysArray(root, keysArr, 0);
 	  return keysArr;
@@ -667,6 +683,11 @@ public class RBTree {
   public RBNode getLocationToInsertNodeAt(RBNode root, int requiredKey)
   {
 	  RBNode currentNode = root;
+	  if(null == root)
+	  {
+		  return null;
+	  }
+	  
 	  while(-1 != currentNode.key)
 	   {
 		   if(requiredKey == currentNode.key)
