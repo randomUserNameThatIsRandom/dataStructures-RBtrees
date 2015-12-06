@@ -541,6 +541,10 @@ public class RBTree {
   public int[] keysToArray()
   {
 	  int[] keysArr = new int[this.size];
+	  if(this.size==0)
+	  {
+		  return keysArr;
+	  }
 	  generateKeysArray(root, keysArr, 0);
 	  return keysArr;
   }
@@ -556,6 +560,10 @@ public class RBTree {
   public String[] valuesToArray()
   {
 	  String[] valuesArr = new String[size];
+	  if(this.size==0)
+	  {
+		  return valuesArr;
+	  }
 	  generateValuesArray(root, valuesArr, 0);
 	  return valuesArr;
   }
