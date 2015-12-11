@@ -1,6 +1,9 @@
 package data_structures;
 
 import java.io.PrintStream;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Consumer;
 
 /**
  *
@@ -17,12 +20,153 @@ public class RBTree {
 	private int size = 0;
 	private final RBNode dummyNode = new RBNode(-1 ,"" , false);
 	
+	public int minKey()
+	   {
+			if(this.empty())
+			{
+				return -2;
+			}
+
+			RBNode currentNode = root;
+
+			while(-1 != currentNode.left.key)
+			{
+				currentNode = currentNode.left;
+			}
+		   return currentNode.key;
+		}
+	
+		public int maxKey()
+		{
+			if(this.empty())
+			{
+				return -2;
+			}
+			RBNode currentNode = root;
+			while(-1 != currentNode.right.key)
+			{
+				currentNode = currentNode.right;
+			}
+			return currentNode.key;
+		}
+	
+	public RBTree()
+	{
+		return;
+	}
+	
+	public RBTree(Iterable<Map.Entry<Integer, String>> items) {
+        this();
+        insertItems(items);
+    }
+	
+	public RBTree(Map<Integer, String> map) {
+        this();
+        insertItems(map);
+    }
+	
+	public void insertItems(Map<Integer, String> map) {
+        insertItems(map.entrySet());
+    }
+	
+	public void insertItems(Iterable<Map.Entry<Integer, String>> items) {
+        for (Map.Entry<Integer, String> item : items) {
+            insert(item.getKey(), item.getValue());
+        }
+    }
+	
 	void printTree() {
         printTree(System.out);
     }
 	
 	void printTree(PrintStream stream) {
         root.printTree(stream);
+    }
+	
+	void checkTreeInvariants() {
+		if(empty()){
+			return;
+		}
+        try {
+            checkTreeInvariants_();
+        } catch (Throwable throwable) {
+            printTree();
+            throw throwable;
+        }
+	}
+	
+	private void checkTreeInvariants_() {
+        assert dummyNode.getRight() == null : "rootDummy has a right child";
+        assert dummyNode.getLeft() == null : "rootDummy has a right child";
+        assert !dummyNode.isRed() : "Invalid color for rootDummy";
+        assert dummyNode.parent == null : "Invalid parent for rootDummy";
+        assert dummyNode.key == -1 : "Invalid key nil";
+        assert dummyNode.value == "" : "Invalid item for nil";
+        
+        checkSubtreeInvariants(getRoot());
+        
+        TreeMap<Integer, String> map = toTreeMap();
+        assert map.size() == size() : "Incorrect size";
+    }
+	
+	public TreeMap<Integer, String> toTreeMap() {
+        TreeMap<Integer, String> map = new TreeMap<>();
+        if(!empty()){
+        	toMap(map);
+        }
+        //map.put(-1, "-1");
+        return map;
+    }
+	
+	public void toMap(Map<Integer, String> map) {
+        walkPreOrder(getRoot(), (node) -> map.put(node.key, node.value));
+    }
+	
+	static Consumer<RBNode> dummyConsumer = (a) -> {
+    };
+	
+	private void walkPreOrder(RBNode node, Consumer<RBNode> consumer) {
+        walk(node, consumer, dummyConsumer, dummyConsumer);
+    }
+	
+	private void walk(RBNode node, Consumer<RBNode> consumerPre, Consumer<RBNode> consumerIn, Consumer<RBNode> consumerPost) {
+        if (node == dummyNode) {
+            return;
+        }
+        consumerPre.accept(node);
+        walk(node.left, consumerPre, consumerIn, consumerPost);
+        consumerIn.accept(node);
+        walk(node.right, consumerPre, consumerIn, consumerPost);
+        consumerPost.accept(node);
+    }
+	
+	private int checkSubtreeInvariants(RBNode node) {
+        assert node != null : "Invalid node (null)";
+        if (node == dummyNode) {
+            return 1;
+        }
+        
+        assert (node.isRed() && node.parent.isRed()) : "Red rule violated";
+        
+        int black_length = 0;
+        if (!node.isRed()) {
+            black_length += 1;
+        }
+        
+        
+        if (node.getLeft() != dummyNode) {
+            assert node.left.key < node.key : "Left child key not lower than node key";
+        }
+        if (node.getRight() != dummyNode) {
+            assert node.right.key > node.key : "Right child key not higher then node key";
+        }
+        
+        int left_black_length = checkSubtreeInvariants(node.left);
+        int right_black_length = checkSubtreeInvariants(node.right);
+        assert left_black_length == right_black_length : "Black rule violated";
+        black_length += left_black_length;
+        
+        return black_length;
     }
 
 /**
@@ -167,6 +311,10 @@ public class RBTree {
    * returns -1 if an item with key k already exists in the tree.
    */
    public int insert(int k, String v) {
+	   if(k <= -1)
+	   {
+		   return -1;
+	   }
 	   RBNode insertNode = new RBNode(k,v,true);
 	   insertNode.left = dummyNode;
 	   insertNode.right = dummyNode;
@@ -217,6 +365,10 @@ public class RBTree {
    */
    public int delete(int k)
    {
+	   if(k <= -1)
+	   {
+		   return -1;
+	   }
 		RBNode nodeToDelete = getNodeWithKey(this.root, k);
 		
 		// the node we are requested to delete is not in the tree
