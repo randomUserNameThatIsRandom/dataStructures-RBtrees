@@ -17,38 +17,20 @@ import java.util.function.Consumer;
 public class RBTree {
 	
 	private RBNode root = null;
+	private RBNode minNode = null;
+	private RBNode maxNode = null;
 	private int size = 0;
 	private final RBNode dummyNode = new RBNode(-1 ,"" , false);
 	
 	public int minKey()
-	   {
-			if(this.empty())
-			{
-				return -2;
-			}
-
-			RBNode currentNode = root;
-
-			while(-1 != currentNode.left.key)
-			{
-				currentNode = currentNode.left;
-			}
-		   return currentNode.key;
-		}
+	{
+		return empty() ? -2 : minNode.key; 
+	}
 	
-		public int maxKey()
-		{
-			if(this.empty())
-			{
-				return -2;
-			}
-			RBNode currentNode = root;
-			while(-1 != currentNode.right.key)
-			{
-				currentNode = currentNode.right;
-			}
-			return currentNode.key;
-		}
+	public int maxKey()
+	{
+		return empty() ? -2 : maxNode.key; 
+	}
 	
 	public RBTree()
 	{
@@ -322,6 +304,8 @@ public class RBTree {
 	   // if the tree is empty insert as root
 	   if(this.empty())
 	   {
+		   minNode = insertNode;
+		   maxNode = insertNode;
 		   insertNode.parent = dummyNode;
 		   this.root = insertNode;
 		   this.root.is_red = false;
@@ -347,6 +331,16 @@ public class RBTree {
 	   else
 	   {
 		   positionNode.right = insertNode;
+	   }
+
+	   // update max and min nodes
+	   if(insertNode.key < minNode.key)
+	   {
+		   minNode = insertNode;
+	   }
+	   if(insertNode.key > maxNode.key)
+	   {
+		   maxNode = insertNode;
 	   }
 	   
 	   // fix the RBTree to a valid state and return the number of color switches 
@@ -378,6 +372,22 @@ public class RBTree {
 		}
 
 		this.size -= 1;
+		
+		// update min and max nodes
+		if(nodeToDelete == minNode)
+		{
+			if(minNode.parent == dummyNode)
+			{
+				minNode = minNode.getRight() == null ? null : minNode.getRight();
+			}
+		}
+		if(nodeToDelete == maxNode)
+		{
+			if(maxNode.parent == dummyNode)
+			{
+				maxNode = maxNode.getLeft() == null ? null : maxNode.getLeft();
+			}
+		}
 
 		// if the node has both children
 		if (-1 != nodeToDelete.left.key && -1 != nodeToDelete.right.key)
@@ -659,18 +669,11 @@ public class RBTree {
     */
    public String min()
    {
-		if(this.empty())
-		{
-			return null;
-		}
-
-		RBNode currentNode = root;
-
-		while(-1 != currentNode.left.key)
-		{
-			currentNode = currentNode.left;
-		}
-	   return currentNode.value;
+	   if(this.empty())
+	   {
+		   return null;
+	   }
+	   return minNode.value;
 	}
 
 //************************************************************************************
@@ -686,12 +689,7 @@ public class RBTree {
 		{
 			return null;
 		}
-		RBNode currentNode = root;
-		while(-1 != currentNode.right.key)
-		{
-			currentNode = currentNode.right;
-		}
-		return currentNode.value;
+		return maxNode.value;
 	}
 
 //************************************************************************************
