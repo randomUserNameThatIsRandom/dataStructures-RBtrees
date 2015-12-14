@@ -202,7 +202,6 @@ public class RBTree {
    }
 
 //************************************************************************************
-// TODO JONATHAN - make sure that our implemntation indeed has a black leaf to every node that has a key/value.
   /**
    * public int delete(int k)
    *
