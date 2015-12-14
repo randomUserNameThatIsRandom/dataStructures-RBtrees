@@ -354,7 +354,6 @@ public class RBTree {
    }
 
 //************************************************************************************
-// TODO JONATHAN - make sure that our implemntation indeed has a black leaf to every node that has a key/value.
   /**
    * public int delete(int k)
    *
@@ -425,7 +424,7 @@ public class RBTree {
    }
 	//************************************************************************************
 	/**
-   * public int fixDeleteDoubleBlack(int k)
+   * public int fixDeleteDoubleBlack(RBNode doubleBlackNode)
    *
    * fixes the issue that the subtree under doubleBlackNode has a black depth lower by one
    * than any of it's relatives.
@@ -436,8 +435,6 @@ public class RBTree {
    */
 	private int fixDeleteDoubleBlack(RBNode doubleBlackNode)
 	{
-		//this.printTree();
-		//System.out.println("");
 		
 		// if this is the root with the double black issue.
 		if (-1 == doubleBlackNode.parent.key) 
@@ -505,7 +502,6 @@ public class RBTree {
 						return (colorFlipsNum + 1);
 					}
 					// if the double black node is a right child.
-					// TODO - is there a simpler way to do this one? this is an ajacent cace I deduced.
 					else
 					{
 						int colorFlipsNum = 0;
@@ -597,7 +593,7 @@ public class RBTree {
     * private void removeNodeWithUpToOneChild
     *
     * removes the specified node from the tree
-    *
+    * assumes the node has one child at most.
     * @ param 
     * nodeToDelete: a pointer to the node to remove
     */
