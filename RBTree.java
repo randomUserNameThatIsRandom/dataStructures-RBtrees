@@ -1,10 +1,3 @@
-package data_structures;
-
-import java.io.PrintStream;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Consumer;
-
 /**
  *
  * RBTree
@@ -16,197 +9,57 @@ import java.util.function.Consumer;
 
 public class RBTree {
 	
+	/**
+     * represents the root node of the tree
+     */
 	private RBNode root = null;
+	/**
+     * represents the node with the minimal key
+     */
 	private RBNode minNode = null;
+	/**
+     * represents the node with the maximal key
+     */
 	private RBNode maxNode = null;
+	/**
+     * represents the number of nodes in the tree
+     */
 	private int size = 0;
+	/**
+     * represents a dummy node to be parent of root and child of leaf
+     */
 	private final RBNode dummyNode = new RBNode(-1 ,"" , false);
 	
-	public int minKey()
-	{
-		return empty() ? -2 : minNode.key; 
-	}
-	
-	public int maxKey()
-	{
-		return empty() ? -2 : maxNode.key; 
-	}
-	
-	public RBTree()
-	{
-		return;
-	}
-	
-	public RBTree(Iterable<Map.Entry<Integer, String>> items) {
-        this();
-        insertItems(items);
-    }
-	
-	public RBTree(Map<Integer, String> map) {
-        this();
-        insertItems(map);
-    }
-	
-	public void insertItems(Map<Integer, String> map) {
-        insertItems(map.entrySet());
-    }
-	
-	public void insertItems(Iterable<Map.Entry<Integer, String>> items) {
-        for (Map.Entry<Integer, String> item : items) {
-            insert(item.getKey(), item.getValue());
-        }
-    }
-	
-	void printTree() {
-        printTree(System.out);
-    }
-	
-	void printTree(PrintStream stream) {
-        root.printTree(stream);
-    }
-	
-	void checkTreeInvariants() {
-		if(empty()){
-			return;
-		}
-        try {
-            checkTreeInvariants_();
-        } catch (Throwable throwable) {
-            printTree();
-            throw throwable;
-        }
-	}
-	
-	private void checkTreeInvariants_() {
-        assert dummyNode.getRight() == null : "rootDummy has a right child";
-        assert dummyNode.getLeft() == null : "rootDummy has a right child";
-        assert !dummyNode.isRed() : "Invalid color for rootDummy";
-        assert dummyNode.parent == null : "Invalid parent for rootDummy";
-        assert dummyNode.key == -1 : "Invalid key nil";
-        assert dummyNode.value == "" : "Invalid item for nil";
-        
-        checkSubtreeInvariants(getRoot());
-        
-        TreeMap<Integer, String> map = toTreeMap();
-        assert map.size() == size() : "Incorrect size";
-    }
-	
-	public TreeMap<Integer, String> toTreeMap() {
-        TreeMap<Integer, String> map = new TreeMap<>();
-        if(!empty()){
-        	toMap(map);
-        }
-        //map.put(-1, "-1");
-        return map;
-    }
-	
-	public void toMap(Map<Integer, String> map) {
-        walkPreOrder(getRoot(), (node) -> map.put(node.key, node.value));
-    }
-	
-	static Consumer<RBNode> dummyConsumer = (a) -> {
-    };
-	
-	private void walkPreOrder(RBNode node, Consumer<RBNode> consumer) {
-        walk(node, consumer, dummyConsumer, dummyConsumer);
-    }
-	
-	private void walk(RBNode node, Consumer<RBNode> consumerPre, Consumer<RBNode> consumerIn, Consumer<RBNode> consumerPost) {
-        if (node == dummyNode) {
-            return;
-        }
-        consumerPre.accept(node);
-        walk(node.left, consumerPre, consumerIn, consumerPost);
-        consumerIn.accept(node);
-        walk(node.right, consumerPre, consumerIn, consumerPost);
-        consumerPost.accept(node);
-    }
-	
-	private int checkSubtreeInvariants(RBNode node) {
-        assert node != null : "Invalid node (null)";
-        if (node == dummyNode) {
-            return 1;
-        }
-        
-        assert (node.isRed() && node.parent.isRed()) : "Red rule violated";
-        
-        int black_length = 0;
-        if (!node.isRed()) {
-            black_length += 1;
-        }
-        
-        
-        if (node.getLeft() != dummyNode) {
-            assert node.left.key < node.key : "Left child key not lower than node key";
-        }
-        if (node.getRight() != dummyNode) {
-            assert node.right.key > node.key : "Right child key not higher then node key";
-        }
-        
-        int left_black_length = checkSubtreeInvariants(node.left);
-        int right_black_length = checkSubtreeInvariants(node.right);
-        assert left_black_length == right_black_length : "Black rule violated";
-        black_length += left_black_length;
-        
-        return black_length;
-    }
-
 /**
    * public class RBNode
    */
   public class RBNode{
+	  
+	  	/**
+	     * the value of the node
+	     */
 	  	private String value;
+	  	/**
+	     * the key of the node
+	     */
 	  	private int key;
+	  	/**
+	     * the left child of the node
+	     */
 	  	private RBNode left;
+	  	/**
+	     * the right child of the node
+	     */
 	  	private RBNode right;
+	  	/**
+	     * the parent of the node
+	     */
 	  	private RBNode parent;
+	  	/**
+	     * true if and only if the node's color is red
+	     */
 	  	private boolean is_red;
-	  	
-	  	public void printTree() {
-	        printTree(System.out);
-	    }
-
-	    public void printTree(PrintStream out) {
-	        if (right != dummyNode) {
-	            right.printTree(out, true, "");
-	        }
-	        printNodeValue(out);
-	        if (left != dummyNode) {
-	            left.printTree(out, false, "");
-	        }
-	    }
-	    
-	    private void printNodeValue(PrintStream out) {
-	        out.print(toStringMinimal() + '\n');
-	    }
-
-	    private void printTree(PrintStream out, boolean isRight, String indent) {
-	        if (right != dummyNode) {
-	            right.printTree(out, true, indent + (isRight ? "        " : " |      "));
-	        }
-	        out.print(indent);
-	        if (isRight) {
-	            out.print(" /");
-	        } else {
-	            out.print(" \\");
-	        }
-	        out.print("----- ");
-	        out.print(toStringMinimal() + '\n');
-	        if (left != dummyNode) {
-	            left.printTree(out, false, indent + (isRight ? " |      " : "        "));
-	        }
-	    }
-	    
-	    public String toStringMinimal(){
-			if (this == dummyNode)
-				return "Sentinal";
-			
-			if (!this.is_red)
-				return Integer.toString(key);
-			return "<" + Integer.toString(key) + ">";
-			
-		}
-	  	
+	  		  	
 	  	RBNode(int key, String value, boolean is_red){
 	  		this.key = key;
 	  		this.value = value;
@@ -215,6 +68,7 @@ public class RBTree {
 	  		this.right = null;
 	  		this.parent = null;
 	  	}
+	  	
 		boolean isRed(){ return is_red;}
 		RBNode getLeft(){return left;}
 		RBNode getRight(){return right;}
@@ -256,7 +110,7 @@ public class RBTree {
   public String search(int k)
   {
 	  if(this.empty())
-    {
+	  {
 		  return null;
 	  }
 	  RBNode currentNode = root;
@@ -348,6 +202,7 @@ public class RBTree {
    }
 
 //************************************************************************************
+// TODO JONATHAN - make sure that our implemntation indeed has a black leaf to every node that has a key/value.
   /**
    * public int delete(int k)
    *
@@ -432,7 +287,322 @@ public class RBTree {
 		return(fixDeleteDoubleBlack(nodeToDeleteChild));
 
    }
-	//************************************************************************************
+
+//************************************************************************************
+   /**
+    * public String min()
+    *
+    * Returns the value of the item with the smallest key in the tree,
+    * or null if the tree is empty
+    */
+   public String min()
+   {
+	   if(this.empty())
+	   {
+		   return null;
+	   }
+	   return minNode.value;
+	}
+
+//************************************************************************************
+	/**
+    * public String max()
+    *
+    * Returns the value of the item with the largest key in the tree,
+    * or null if the tree is empty
+    */
+	public String max()
+	{
+		if(this.empty())
+		{
+			return null;
+		}
+		return maxNode.value;
+	}
+
+//************************************************************************************
+  /**
+   * Returns a sorted array which contains all keys in the tree,
+   * or an empty array if the tree is empty.
+   */
+  public int[] keysToArray()
+  {
+	  int[] keysArr = new int[this.size];
+	  if (0 == this.size) 
+	  {
+		return keysArr;
+	  }
+	  
+	  generateKeysArray(root, keysArr, 0);
+	  return keysArr;
+  }
+
+//************************************************************************************
+  /**
+   * public String[] valuesToArray()
+   *
+   * Returns an array which contains all values in the tree,
+   * sorted by their respective keys,
+   * or an empty array if the tree is empty.
+   */
+  public String[] valuesToArray()
+  {
+	  String[] valuesArr = new String[size];
+	  if (0 == this.size) 
+	  {
+		return valuesArr;
+	  }
+	  
+	  generateValuesArray(root, valuesArr, 0);
+	  return valuesArr;
+  }
+
+//************************************************************************************   
+   /**
+    * public int size()
+    *
+    * Returns the number of nodes in the tree.
+    *
+    * precondition: none
+    * postcondition: none
+    */
+   public int size()
+   {
+	   return this.size;
+   }
+
+//************************************************************************************   
+   /**
+    * public int generateKeysArray()
+    *
+    * Returns a sorted array with the keys in the tree
+    *
+    * @ param 
+    * root: a pointer to the tree's root node.
+    * arr:  an array which will eventually contain the result, should be large enough
+    *         to contain all keys.
+    * index:  should be 0 when intialy invoked
+    * 
+    */
+   public int generateKeysArray(RBNode root, int[] arr, int index)
+   {
+      if(-1 == root.key)
+      {
+        return index;
+      }
+
+      index = generateKeysArray(root.left, arr, index);
+      arr[index] = root.key;
+      index++;
+      index = generateKeysArray(root.right, arr, index);
+      return index;
+   }
+
+//************************************************************************************   
+   /**
+    * public int generateValuesArray()
+    *
+    * Returns a sorted array with the values in the tree (sorted by key)
+    *
+    * @ param 
+    * root: a pointer to the tree's root node.
+    * arr:  an array which will eventually contain the result, should be large enought
+    *         to contain all keys.
+    * index:  should be 0 when intialy invoked
+    * @ return:
+    * 	A sorted array with the values in the tree (sorted by key)
+    */
+
+  public int generateValuesArray(RBNode root, String[] arr, int index)
+  {
+    if(-1 == root.key)
+    {
+      return index;
+    }
+    
+    index = generateValuesArray(root.left, arr, index);
+    arr[index] = root.value;
+    index++;
+    index = generateValuesArray(root.right, arr, index);
+    return index;
+   }
+
+//************************************************************************************
+   
+  /**
+   * public RBNode getNodeWithKey()
+   * @ param 
+   * 	root: the node to start the search from
+   * 	requiredKey: the key of the node the user request to be found.
+	* @ return
+   *	A Red Black tree node that has the specified key, null if no such node
+   *	exists
+   */
+  public RBNode getNodeWithKey(RBNode root, int requiredKey)
+  {
+	  RBNode locationNode = getLocationToInsertNodeAt(root, requiredKey);
+	  if (null == locationNode) 
+	  {
+		return null;  
+	  }
+	  
+	  // the key is not in the tree
+	  if(requiredKey != locationNode.key)
+	  {
+		  return null;
+	  }
+	  // the key is in the tree
+	  return locationNode;
+  }
+  
+//************************************************************************************
+   /**
+    * public RBNode getLocationToInsertNodeAt()
+    * @ param 
+    * 	root: the node to start the search from
+    * 	requiredKey: the key of the node the user request to be found.
+	* @ return
+    *	A Red Black tree node that has the specified key, the parent of the node
+    *	had it been in the tree (if it does not exist).
+    */
+  public RBNode getLocationToInsertNodeAt(RBNode root, int requiredKey)
+  {
+	  RBNode currentNode = root;
+	  if(null == root)
+	  {
+		  return null;
+	  }
+	  
+	  while(-1 != currentNode.key)
+	   {
+		  // this is the node we looked for
+		   if(requiredKey == currentNode.key)
+		   {
+			   return currentNode;
+		   }
+		   // the required node is in the left subtree
+		   else if(requiredKey < currentNode.key)
+		   {
+			   // we reached a leaf without finding
+			   if(currentNode.left == dummyNode)
+			   {
+				   return currentNode;
+			   }
+			   currentNode = currentNode.left;
+		   }
+		   // the required node is in the right subtree
+		   else
+		   {
+			   // we reached a leaf without finding
+			   if(currentNode.right == dummyNode)
+			   {
+				   return currentNode;
+			   }
+			   currentNode = currentNode.right;
+		   }
+	   }
+	  return null;
+  }
+
+//************************************************************************************
+  /**
+   * public int insertFixup()
+   *
+   * fixes the RBTree to make it valid after insert.
+   * @ params
+   *	node: the node that requires the fix
+   * @ return
+   *	the number of color switches made.
+   */
+  public int insertFixup(RBNode node)
+  {
+	  int colorSwitchesNum = 0;
+	  
+	  // while the parent of the red node is red we need to continue fixing
+	  while(node != dummyNode && node.parent != dummyNode && node.parent.is_red)
+	  {
+		  // the case where the node's parent is a left child
+		  if(node.parent == node.parent.parent.left)
+		  {
+			  RBNode uncleNode = node.parent.parent.right;
+			  // case 1: the node's uncle is red
+			  if(uncleNode.is_red)
+			  {
+				  // the parent and the uncle become black
+				  // the grandparent becomes red
+				  colorSwitchesNum += 3;
+				  node.parent.is_red = false;
+				  uncleNode.is_red = false;
+				  node.parent.parent.is_red = true;
+				  node = node.parent.parent;
+			  }
+			  
+			  else
+			  {
+				  // case 2: the node's uncle is black and the node is a right child
+				  if(node == node.parent.right)
+				  {
+					  // use a left rotation to get to case 3
+					  node = node.parent;
+					  leftRotate(node);
+				  }
+				  
+				  // case 3: the node's uncle is black and the node is a left child
+				  // the parent becomes black and the grandparent too
+				  // use a right rotation on the node's parent to resolve height issues
+				  colorSwitchesNum += 2;
+				  node.parent.is_red = false;
+				  node.parent.parent.is_red = true;
+				  rightRotate(node.parent.parent);
+			  }
+		  }
+		  
+		  // the symmetric case where the node's parent is a right child
+		  else
+		  {
+			  RBNode uncleNode = node.parent.parent.left;
+			  // case 1: the node's uncle is red
+			  if(uncleNode.is_red)
+			  {
+				  // the parent and the uncle become black
+				  // the grandparent becomes red
+				  colorSwitchesNum += 3;
+				  node.parent.is_red = false;
+				  uncleNode.is_red = false;
+				  node.parent.parent.is_red = true;
+				  node = node.parent.parent;
+			  }
+			  
+			  else
+			  {
+				  // case 2: the node's uncle is black and the node is a left child
+				  if(node == node.parent.left)
+				  {
+					  // use a right rotation to get to case 3
+					  node = node.parent;
+					  rightRotate(node);
+				  }
+				  // case 3: the node's uncle is black and the node is a right child
+				  // the parent becomes black and the grandparent too
+				  // use a left rotation on the node's parent to resolve height issues
+				  colorSwitchesNum += 2;
+				  node.parent.is_red = false;
+				  node.parent.parent.is_red = true;
+				  leftRotate(node.parent.parent);
+			  }
+		  }
+	  }
+	  
+	  // if the root became red we need to change it back
+	  if(root.is_red)
+	  {
+		  root.is_red = false;
+		  colorSwitchesNum++;
+	  }
+	  return colorSwitchesNum;
+  }
+  
+//************************************************************************************
 	/**
    * public int fixDeleteDoubleBlack(RBNode doubleBlackNode)
    *
@@ -445,7 +615,6 @@ public class RBTree {
    */
 	private int fixDeleteDoubleBlack(RBNode doubleBlackNode)
 	{
-		
 		// if this is the root with the double black issue.
 		if (-1 == doubleBlackNode.parent.key) 
 		{
@@ -603,7 +772,7 @@ public class RBTree {
     * private void removeNodeWithUpToOneChild
     *
     * removes the specified node from the tree
-    * assumes the node has one child at most.
+    * assumes the nde has one child at most
     * @ param 
     * nodeToDelete: a pointer to the node to remove
     */
@@ -655,315 +824,6 @@ public class RBTree {
 			}
 		}
    }
-
-//************************************************************************************
-   /**
-    * public String min()
-    *
-    * Returns the value of the item with the smallest key in the tree,
-    * or null if the tree is empty
-    */
-   public String min()
-   {
-	   if(this.empty())
-	   {
-		   return null;
-	   }
-	   return minNode.value;
-	}
-
-//************************************************************************************
-	/**
-    * public String max()
-    *
-    * Returns the value of the item with the largest key in the tree,
-    * or null if the tree is empty
-    */
-	public String max()
-	{
-		if(this.empty())
-		{
-			return null;
-		}
-		return maxNode.value;
-	}
-
-//************************************************************************************
-  /**
-   * Returns a sorted array which contains all keys in the tree,
-   * or an empty array if the tree is empty.
-   */
-  public int[] keysToArray()
-  {
-	  int[] keysArr = new int[this.size];
-	  if (0 == this.size) 
-	  {
-		return keysArr;
-	  }
-	  
-	  generateKeysArray(root, keysArr, 0);
-	  return keysArr;
-  }
-
-//************************************************************************************
-  /**
-   * public String[] valuesToArray()
-   *
-   * Returns an array which contains all values in the tree,
-   * sorted by their respective keys,
-   * or an empty array if the tree is empty.
-   */
-  public String[] valuesToArray()
-  {
-	  String[] valuesArr = new String[size];
-	  if (0 == this.size) 
-	  {
-		return valuesArr;
-	  }
-	  generateValuesArray(root, valuesArr, 0);
-	  return valuesArr;
-  }
-
-//************************************************************************************   
-   /**
-    * public int size()
-    *
-    * Returns the number of nodes in the tree.
-    *
-    * precondition: none
-    * postcondition: none
-    */
-   public int size()
-   {
-	   return this.size;
-   }
-
-//************************************************************************************   
-   /**
-    * public int generateKeysArray()
-    *
-    * Returns a sorted array with the keys in the tree
-    *
-    * @ param 
-    * root: a pointer to the tree's root node.
-    * arr:  an array which will eventually contain the result, should be large enough
-    *         to contain all keys.
-    * index:  should be 0 when intialy invoked
-    * 
-    */
-   public int generateKeysArray(RBNode root, int[] arr, int index)
-   {
-      if(-1 == root.key)
-      {
-        return index;
-      }
-
-      index = generateKeysArray(root.left, arr, index);
-      arr[index] = root.key;
-      index++;
-      index = generateKeysArray(root.right, arr, index);
-      return index;
-   }
-
-//************************************************************************************   
-   /**
-    * public int generateValuesArray()
-    *
-    * Returns a sorted array with the values in the tree (sorted by key)
-    *
-    * @ param 
-    * root: a pointer to the tree's root node.
-    * arr:  an array which will eventually contain the result, should be large enought
-    *         to contain all keys.
-    * index:  should be 0 when intialy invoked
-    * @ return:
-    * 	A sorted array with the values in the tree (sorted by key)
-    */
-
-  public int generateValuesArray(RBNode root, String[] arr, int index)
-  {
-    if(-1 == root.key)
-    {
-      return index;
-    }
-    
-    index = generateValuesArray(root.left, arr, index);
-    arr[index] = root.value;
-    index++;
-    index = generateValuesArray(root.right, arr, index);
-    return index;
-   }
-
-//************************************************************************************
-  
- // TODO - document this and getLocationToInsertNodeAt!
-  // getLocationToInsertNodeAt didn't have a logical name so it was split to two functions 
-  /**
-   * public RBNode getNodeWithKey()
-   * @ param 
-   * 	root: the node to start the search from
-   * 	requiredKey: the key of the node the user request to be found.
-	* @ return
-   *	A Red Black tree node that has the specified key, null if no such node
-   *	exists
-   */
-  public RBNode getNodeWithKey(RBNode root, int requiredKey)
-  {
-	  RBNode locationNode = getLocationToInsertNodeAt(root, requiredKey);
-	  if (null == locationNode) 
-	  {
-		return null;  
-	  }
-	  
-	  if(requiredKey != locationNode.key)
-	  {
-		  return null;
-	  }
-	  return locationNode;
-  }
-  
-//************************************************************************************
-   /**
-    * public RBNode getLocationToInsertNodeAt()
-    * @ param 
-    * 	root: the node to start the search from
-    * 	requiredKey: the key of the node the user request to be found.
-	* @ return
-    *	A Red Black tree node that has the specified key, the parent of the node
-    *	had it been in the tree.
-    *	exists
-    */
-  public RBNode getLocationToInsertNodeAt(RBNode root, int requiredKey)
-  {
-	  RBNode currentNode = root;
-	  if(null == root)
-	  {
-		  return null;
-	  }
-	  
-	  while(-1 != currentNode.key)
-	   {
-		   if(requiredKey == currentNode.key)
-		   {
-			   return currentNode;
-		   }
-		   else if(requiredKey < currentNode.key)
-		   {
-			   if(currentNode.left == dummyNode)
-			   {
-				   return currentNode;
-			   }
-			   currentNode = currentNode.left;
-		   }
-		   else
-		   {
-			   if(currentNode.right == dummyNode)
-			   {
-				   return currentNode;
-			   }
-			   currentNode = currentNode.right;
-		   }
-	   }
-	  return null;
-  }
-
-//************************************************************************************
-  /**
-   * public int insertFixup()
-   *
-   * fixes the RBTree to make it valid after insert.
-   * @ params
-   *	node: the node that requires the fix
-   * @ return
-   *	the number of color switches made.
-   */
-  public int insertFixup(RBNode node)
-  {
-	  int colorSwitchesNum = 0;
-	  
-	  // while the parent of the red node is red we need to continue fixing
-	  while(node != dummyNode && node.parent != dummyNode && node.parent.is_red)
-	  {
-		  // the case where the node's parent is a left child
-		  if(node.parent == node.parent.parent.left)
-		  {
-			  RBNode uncleNode = node.parent.parent.right;
-			  // case 1: the node's uncle is red
-			  if(uncleNode.is_red)
-			  {
-				  // the parent and the uncle become black
-				  // the grandparent becomes red
-				  colorSwitchesNum += 3;
-				  node.parent.is_red = false;
-				  uncleNode.is_red = false;
-				  node.parent.parent.is_red = true;
-				  node = node.parent.parent;
-			  }
-			  
-			  else
-			  {
-				  // case 2: the node's uncle is black and the node is a right child
-				  if(node == node.parent.right)
-				  {
-					  // use a left rotation to get to case 3
-					  node = node.parent;
-					  leftRotate(node);
-				  }
-				  
-				  // case 3: the node's uncle is black and the node is a left child
-				  // the parent becomes black and the grandparent too
-				  // use a right rotation on the node's parent to resolve height issues
-				  colorSwitchesNum += 2;
-				  node.parent.is_red = false;
-				  node.parent.parent.is_red = true;
-				  rightRotate(node.parent.parent);
-			  }
-		  }
-		  
-		  // the symmetric case where the node's parent is a right child
-		  else
-		  {
-			  RBNode uncleNode = node.parent.parent.left;
-			  // case 1: the node's uncle is red
-			  if(uncleNode.is_red)
-			  {
-				  // the parent and the uncle become black
-				  // the grandparent becomes red
-				  colorSwitchesNum += 3;
-				  node.parent.is_red = false;
-				  uncleNode.is_red = false;
-				  node.parent.parent.is_red = true;
-				  node = node.parent.parent;
-			  }
-			  
-			  else
-			  {
-				  // case 2: the node's uncle is black and the node is a left child
-				  if(node == node.parent.left)
-				  {
-					  // use a right rotation to get to case 3
-					  node = node.parent;
-					  rightRotate(node);
-				  }
-				  // case 3: the node's uncle is black and the node is a right child
-				  // the parent becomes black and the grandparent too
-				  // use a left rotation on the node's parent to resolve height issues
-				  colorSwitchesNum += 2;
-				  node.parent.is_red = false;
-				  node.parent.parent.is_red = true;
-				  leftRotate(node.parent.parent);
-			  }
-		  }
-	  }
-	  
-	  // if the root became red we need to change it back
-	  if(root.is_red)
-	  {
-		  root.is_red = false;
-		  colorSwitchesNum++;
-	  }
-	  return colorSwitchesNum;
-  }
 
 //************************************************************************************
    /**
