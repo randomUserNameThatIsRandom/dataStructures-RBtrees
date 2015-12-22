@@ -47,19 +47,15 @@ public class BinomialHeap
     	{
     		this.minNode = new HeapNode(value);
     		this.roots.add(minNode);
+    		this.size = 1;
     	}
     	// if the heap is not empty
     	else
     	{
     		BinomialHeap heap = new BinomialHeap();
         	heap.insert(value);
-        	if(this.minNode.value > heap.minNode.value)
-        	{
-        		this.minNode = heap.minNode;
-        	}
         	this.meld(heap);
     	}
-    	this.size++;
     }
   //****************************************************************************************************************
    /**
@@ -103,6 +99,10 @@ public class BinomialHeap
     * Meld the heap with heap2
     *
     */
+//    public boolean handlePossibleDuplicateRank(int rankToCheck, Object position, HeapNode currentNode)
+//    {
+//    	
+//    }
     public void meld (BinomialHeap heap2)
     {
     	
@@ -110,27 +110,48 @@ public class BinomialHeap
     	int rankToRemember1For = -1;
     	HeapNodeIterator heap1RootsIterator = (HeapNodeIterator)this.roots.iterator();
     	HeapNodeIterator heap2RootsIterator = (HeapNodeIterator)heap2.roots.iterator();
-    	HeapNode currentNodeHeap2 = null;
-    	HeapNode currentNodeHeap1 = null;
-    	// if both have at least one root
-		if(heap2RootsIterator.hasNext() && heap1RootsIterator.hasNext())
-		{
-			currentNodeHeap1 = heap1RootsIterator.next();
-			currentNodeHeap2 = heap2RootsIterator.next();
+    	HeapNode currentNodeHeap2 = heap2RootsIterator.next();
+    	HeapNode currentNodeHeap1 = heap1RootsIterator.next();
+    	
+    	// if the heap we are merging into is empty
+    	if (null == currentNodeHeap1) 
+    	{
+    		while(null != currentNodeHeap2)
+        	{
+    			this.roots.add(currentNodeHeap2);
+    			currentNodeHeap2 = heap2RootsIterator.next();
+        	}
+    		this.minNode = heap2.minNode;
+    		this.size = heap2.size;
+    		return;
 		}
 		
-    	while(heap2RootsIterator.hasNext() && heap1RootsIterator.hasNext())
-    	{
+    	while(null != currentNodeHeap1 && null != currentNodeHeap2)
+    	{    	
+    		if(!this.roots.orgenized(remember1InPosition))
+    		{
+    			assert(false);
+    		}
     		// if we have performed a merge in the previous iteration
     		if (remember1InPosition) 
     		{
 				if (rankToRemember1For == currentNodeHeap1.rank) 
 				{
 					HeapNode prevNode = heap1RootsIterator.getPrev();
+					int rankAdded = currentNodeHeap1.rank;
+					if(!this.roots.orgenized(true))
+		    		{
+		    			assert(false);
+		    		}
 					joinSameRankHeapNodes(prevNode, currentNodeHeap1, heap1RootsIterator.getCurrentNodePosition());
 					this.roots.removeNodeBeforePosition(heap1RootsIterator.getCurrentNodePosition());
+					if(!this.roots.orgenized(true))
+		    		{
+		    			assert(false);
+		    		}
 					remember1InPosition = true;
-	    			rankToRemember1For = currentNodeHeap1.rank;
+	    			rankToRemember1For = rankAdded + 1;
+	    			currentNodeHeap1 = heap1RootsIterator.next();
 					continue;
 				}
 				else
@@ -144,8 +165,24 @@ public class BinomialHeap
     		if (currentNodeHeap1.rank > currentNodeHeap2.rank) 
     		{
     			// insert the node to the roots list, no conflicts arise.
+    			if(!this.roots.orgenized(false))
+	    		{
+    				Iterator<HeapNode> it = roots.iterator();
+    	    		HeapNode curNode = null;
+    	    		while (it.hasNext()) 
+    	    		{
+    	    			curNode = it.next();
+    	    			System.err.println("got node with rank(in error):" + curNode.rank);
+    				}
+	    			assert(false);
+	    		}
     			this.roots.insertBeforePosition(heap1RootsIterator.getCurrentNodePosition(), currentNodeHeap2);
+    			if(!this.roots.orgenized(false))
+	    		{
+	    			assert(false);
+	    		}
     			this.size += (int)Math.pow(2, currentNodeHeap2.rank);
+    			updateMinIfRequired(currentNodeHeap2);
 				currentNodeHeap2 = heap2RootsIterator.next();
 			}
     		// if the rank we are at in heap1 is smaller we just advance the pointer, we don't know 
@@ -157,26 +194,94 @@ public class BinomialHeap
     		// if they both have the same rank.
     		else
     		{
+    			int rankAdded = currentNodeHeap2.rank;
+    			if(!this.roots.orgenized(false))
+	    		{
+	    			assert(false);
+	    		}
     			joinSameRankHeapNodes(currentNodeHeap1, currentNodeHeap2, heap1RootsIterator.getCurrentNodePosition());
+    			if(!this.roots.orgenized(true))
+	    		{
+	    			assert(false);
+	    		}
+    			this.size += (int) Math.pow(2, rankAdded);
     			remember1InPosition = true;
-    			rankToRemember1For = currentNodeHeap1.rank;
+    			rankToRemember1For = rankAdded + 1;
     			currentNodeHeap1 = heap1RootsIterator.next();
     			currentNodeHeap2 = heap2RootsIterator.next();
     		}
     	}
-    	// insert the remaining elements at the end of the list.
-    	while(heap2RootsIterator.hasNext())
+    	
+    	while (remember1InPosition && null != currentNodeHeap1) 
+		{
+			if (rankToRemember1For == currentNodeHeap1.rank) 
+			{
+				HeapNode prevNode = heap1RootsIterator.getPrev();
+				if(!this.roots.orgenized(true))
+	    		{
+	    			assert(false);
+	    		}
+				int rankAdded = currentNodeHeap1.rank;
+				joinSameRankHeapNodes(prevNode, currentNodeHeap1, heap1RootsIterator.getCurrentNodePosition());
+				this.roots.removeNodeBeforePosition(heap1RootsIterator.getCurrentNodePosition());
+				if(!this.roots.orgenized(true))
+	    		{
+	    			assert(false);
+	    		}
+    			currentNodeHeap1 = heap1RootsIterator.next();
+    			rankToRemember1For = rankAdded + 1;
+			}
+			else
+			{
+				remember1InPosition = false;
+			}
+		}
+    	
+    	if(!this.roots.orgenized(false))
+		{
+    		Iterator<HeapNode> it = roots.iterator();
+    		HeapNode curNode = null;
+    		while (it.hasNext()) 
+    		{
+    			curNode = it.next();
+    			System.err.println("got node with rank(in error):" + curNode.rank);
+			}
+			assert(false);
+		}
+    	// insert the remaining elements we need to call the function again as 
+    	// we don't have an indication where to place them (there may have been)
+    	// multiple joinnings in the previous step.
+    	if (null != currentNodeHeap2)
     	{
-    		currentNodeHeap2 = heap2RootsIterator.next();
-    		this.roots.insertAfterPosition(heap1RootsIterator.getCurrentNodePosition(), currentNodeHeap2);
-    		this.size += (int) Math.pow(2, currentNodeHeap2.rank);
-    		// we have inserted a new node so we will now have a next.
-    		heap1RootsIterator.next();
+    		BinomialHeap newTmpHeap = new BinomialHeap();
+    		while(null != currentNodeHeap2)
+        	{
+        		
+    			newTmpHeap.roots.add(currentNodeHeap2);
+    			currentNodeHeap2 = heap2RootsIterator.next();
+//        		if(!this.roots.orgenized(false))
+//        		{
+//        			assert(false);
+//        		}
+//        		this.roots.insertAfterPosition(heap1RootsIterator.getCurrentNodePosition(), currentNodeHeap2);
+//        		if(!this.roots.orgenized(false))
+//        		{
+//        			assert(false);
+//        		}
+//        		this.size += (int) Math.pow(2, currentNodeHeap2.rank);
+//        		// we have inserted a new node so we will now have a next.
+//        		updateMinIfRequired(heap1RootsIterator.next());
+//        		currentNodeHeap2 = heap2RootsIterator.next();
+    			
+        	}
+    		this.meld(newTmpHeap);
+    		
     	}
+    	
     }
     
     //****************************************************************************************************************
-    public void joinSameRankHeapNodes(HeapNode node1, HeapNode node2, Object position)
+    private void joinSameRankHeapNodes(HeapNode node1, HeapNode node2, Object position)
     {
     	HeapNode newRoot = null;
 		HeapNode newLeaf = null;
@@ -192,9 +297,24 @@ public class BinomialHeap
 		}
 		HeapNodeLinkedList newRootChildren = newRoot.children;
 		newRootChildren.addLast(newLeaf);
-		this.size += (int)Math.pow(2, newRoot.rank);
 		newRoot.rank++;
+		updateMinIfRequired(newRoot);
 		this.roots.replaceNodeAtPosition(position, newRoot);
+    }
+    
+  //****************************************************************************************************************
+    private void updateMinIfRequired(HeapNode newNode)
+    {
+    	if(null == this.minNode)
+    	{
+    		this.minNode = newNode;
+    		return;
+    	}
+    	
+    	if (newNode.value < this.minNode.value) 
+		{
+			this.minNode = newNode;
+		}
     }
 
     //****************************************************************************************************************
@@ -206,6 +326,18 @@ public class BinomialHeap
     */
     public int size()
     {
+    	// TODO remove this print and calculation.
+    	int actuallSize = 0;
+    	Iterator<HeapNode> it = this.roots.iterator();
+    	HeapNode currNode = null;
+    	while (it.hasNext()) 
+    	{
+    		currNode = it.next();
+    		System.err.println("found node with rank: " + currNode.rank);
+			actuallSize += (int) Math.pow(2,currNode.rank);
+		}
+    	
+    	System.err.println("actual size is: " + actuallSize + " returnning: " +this.size);
     	return this.size;
     }
     
@@ -353,9 +485,17 @@ public class BinomialHeap
             	if (null == this.mCurrentNode) 
             	{
             		this.mCurrentNode = this.mLinkedList.mRoot;
-            		return this.mCurrentNode.mValue;
 				}
-            	this.mCurrentNode = this.mCurrentNode.mNext;
+            	else
+            	{
+            		this.mCurrentNode = this.mCurrentNode.mNext;
+            	}
+            	
+            	if (null == mCurrentNode)
+        		{
+        			return null;
+        		}
+            	
                 return this.mCurrentNode.mValue;
             }
             
@@ -401,6 +541,7 @@ public class BinomialHeap
 					currentNode.mNext = newNode;
 					return;
 				}
+				currentNode = currentNode.mNext;
 				
 			}
     		
@@ -513,6 +654,13 @@ public class BinomialHeap
     				 newNode.mNext.mPrev = newNode;
     			 }
     		 }
+    		 // if this is the first node in the list
+    		 else if(null == position)
+    		 {
+    			 HeapNodeLinkedListNode newNode = new HeapNodeLinkedListNode(nodeToInsert, null, null);
+    			 this.mRoot = newNode;
+    			 this.mLast = newNode;
+    		 }
     	 }
     	 
     	 
@@ -536,6 +684,7 @@ public class BinomialHeap
     			 if (this.mRoot == nodeToRemove) 
     			 {
     				 this.mRoot = positionNode;
+    				 positionNode.mPrev = null;
     				 return;
     			 }
     			// jump over it from the previous.
@@ -543,6 +692,53 @@ public class BinomialHeap
     			// set the prev for position Node as we are deleting its prev.
     			positionNode.mPrev = nodeToRemove.mPrev;
     		 }
+    	 }
+    	 
+    	 // TODO remove this
+    	 public boolean orgenized(boolean allowDuplicate)
+    	 {
+    		 HeapNodeLinkedListNode currNode = this.mRoot;
+    		 int prevRank = -1;
+    		 boolean twoConsequtiveSame = false;
+    		 while(null != currNode)
+    		 {
+    			if(currNode.mValue.rank < prevRank)
+    			{
+    				System.err.println("rank is: " + currNode.mValue.rank + " while prevRank is: " + prevRank);
+    				return false;
+    			}
+    			else if (currNode.mValue.rank == prevRank) 
+    			{
+    				if(!allowDuplicate)
+    				{
+    					System.err.println("duplicate when not allowed");
+    					for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+    					    System.out.println(ste);
+    					}
+    					return false;
+    				}
+    					
+    				if (!twoConsequtiveSame) 
+    				{
+    					twoConsequtiveSame = true;
+					}
+    				else
+    				{
+    					System.err.println("three consecutiive same value");
+    					for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+    					    System.out.println(ste);
+    					}
+    					return false;
+    				}
+				}
+    			else
+    			{
+    				twoConsequtiveSame = false;
+    			}
+    			prevRank = currNode.mValue.rank;
+    			currNode = currNode.mNext;
+    		 }
+    		 return true;
     	 }
     }
 }
