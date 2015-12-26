@@ -12,8 +12,17 @@ import data_structures.BinomialHeap.HeapNodeLinkedList.HeapNodeIterator;
 public class BinomialHeap
 {
 	
+	/*
+	 * represents the number of nodes in the heap
+	 */
 	private int size = 0;
+	/*
+	 * represents the node with the minimal value
+	 */
 	private HeapNode minNode = null;
+	/*
+	 * represents the list of binomial trees in the heap
+	 */
 	private HeapNodeLinkedList roots = new HeapNodeLinkedList();
 	
 	//****************************************************************************************************************
@@ -66,16 +75,25 @@ public class BinomialHeap
     */
     public void deleteMin()
     {
-    	this.size--;
-    	HeapNodeLinkedList subtrees = this.minNode.getChildren();
-     	this.roots.remove(minNode);
+    	// remove the tree of which minNode is the root
+    	this.size -= (int) Math.pow(2, this.minNode.rank);
+    	this.roots.remove(minNode);
+    	
+    	// get the children of minNode
+    	HeapNodeLinkedList subtrees = this.minNode.children;
+    	
+    	// iterate all children to add them back to the heap
      	Iterator<HeapNode> iterator = subtrees.iterator();
 		while(iterator.hasNext())
 		{
-			BinomialHeap heap = new BinomialHeap();
 			HeapNode node = iterator.next();
+			node.parent = null;
+			
+			// create new heap with this child and meld it with our heap
+			BinomialHeap heap = new BinomialHeap();
 			heap.roots.add(node);
 			heap.minNode = node;
+			heap.size = (int) Math.pow(2, node.rank);
 			this.meld(heap);
 		}
     }
@@ -104,8 +122,7 @@ public class BinomialHeap
 //    	
 //    }
     public void meld (BinomialHeap heap2)
-    {
-    	
+    {    	
     	boolean remember1InPosition = false;
     	int rankToRemember1For = -1;
     	HeapNodeIterator heap1RootsIterator = (HeapNodeIterator)this.roots.iterator();
@@ -298,6 +315,7 @@ public class BinomialHeap
 		HeapNodeLinkedList newRootChildren = newRoot.children;
 		newRootChildren.addLast(newLeaf);
 		newRoot.rank++;
+		newLeaf.parent = newRoot;
 		updateMinIfRequired(newRoot);
 		this.roots.replaceNodeAtPosition(position, newRoot);
     }
@@ -333,11 +351,11 @@ public class BinomialHeap
     	while (it.hasNext()) 
     	{
     		currNode = it.next();
-    		System.err.println("found node with rank: " + currNode.rank);
+    		//System.err.println("found node with rank: " + currNode.rank);
 			actuallSize += (int) Math.pow(2,currNode.rank);
 		}
     	
-    	System.err.println("actual size is: " + actuallSize + " returnning: " +this.size);
+    	//System.err.println("actual size is: " + actuallSize + " returnning: " +this.size);
     	return this.size;
     }
     
@@ -351,15 +369,7 @@ public class BinomialHeap
   //****************************************************************************************************************
     public int minTreeRank()
     {
-    	String binaryRep = Integer.toBinaryString(this.size);
-    	for(int i = 0; i < binaryRep.length(); i++)
-		{
-			if('1' == binaryRep.charAt(i))
-			{
-				return i + 1;
-			}
-		}
-    	return 0;
+    	return this.roots.mRoot.mValue.rank;
     }
 	
   //****************************************************************************************************************
@@ -371,14 +381,24 @@ public class BinomialHeap
     */
     public boolean[] binaryRep()
     {
-    	String binaryRep = Integer.toBinaryString(this.size);
-		boolean[] arr = new boolean[binaryRep.length()];
-		for(int i = 0; i < arr.length; i++)
-		{
-			arr[i] = '1' == binaryRep.charAt(i);
-		}
-        return arr;
-    }
+    	// if the heap is empty return an empty array
+    	if(this.empty())
+    	{
+    		return new boolean[0];
+    	}
+    	
+    	// the length of the binary representation is log n
+    	boolean[] arr = new boolean[(int) (Math.log(this.size)/Math.log(2))];
+    	
+    	// iterate all roots and update the array in the place of the rank to true
+    	Iterator<HeapNode> iterator = this.roots.iterator();
+    	while(iterator.hasNext())
+    	{
+    		arr[iterator.next().rank - 1] = true;
+    	}
+    	
+    	return arr;
+   }
 
   //****************************************************************************************************************
    /**
@@ -389,7 +409,13 @@ public class BinomialHeap
     */
     public void arrayToHeap(int[] array)
     {
-        return; //	 to be replaced by student code
+    	this.size = 0;
+        this.minNode = null;
+        this.roots = new HeapNodeLinkedList();
+        for(int i=0;i<array.length;i++)
+        {
+        	this.insert(array[i]);
+        }
     }
 	
   //****************************************************************************************************************
@@ -401,7 +427,62 @@ public class BinomialHeap
     */
     public boolean isValid() 
     {
-    	return false; // should be replaced by student code
+    	// array to check that there is only one tree of each degree
+    	HeapNode[] arr = new HeapNode[(int) (Math.log(this.size)/Math.log(2))];
+    	
+    	// iterate all roots to check each tree
+    	Iterator<HeapNode> iterator = this.roots.iterator();
+    	while(iterator.hasNext())
+    	{
+    		HeapNode node = iterator.next();
+    		
+    		// if there was already a tree of this degree the heap is not valid
+    		if(arr[node.rank] != null)
+    		{
+    			return false;
+    		}
+    		// else update that this degree was seen
+    		else
+    		{
+    			arr[node.rank] = node;
+    		}
+    		
+    		// if this is not a valid binomial tree the heap is not valid
+    		if(!isValidBinomialTree(node))
+    		{
+    			return false;
+    		}
+    	}
+    	
+    	return true;
+    }
+    
+    public static boolean isValidBinomialTree(HeapNode node)
+    {
+    	// if the node is null or does not have children it is valid
+    	if(node == null || (node.children.mRoot == null && node.rank == 0))
+    	{
+    		return true;
+    	}
+    	
+    	// divide the node to two binomial trees of rank n-1
+    	HeapNode subtree = node.children.mLast.mValue;
+    	if(subtree.rank != node.rank - 1)
+    	{
+    		return false;
+    	}
+    	subtree.parent = null;
+    	node.children.remove(subtree);
+    	node.rank--;
+    	
+    	// check that the value of child is larger and that the two subtrees are valid
+    	boolean result = subtree.value >= node.value && isValidBinomialTree(node) && isValidBinomialTree(subtree);
+    	
+    	// assemble the tree back
+    	subtree.parent = node;
+    	node.children.add(subtree);
+    	node.rank++;
+    	return result;
     }
     
   //****************************************************************************************************************
@@ -415,9 +496,21 @@ public class BinomialHeap
     */
     public class HeapNode{
     	
+    	/*
+    	 * represents the rank of the binomial tree that this is its root
+    	 */
     	public int rank;
+    	/*
+    	 * represents the value of the node
+    	 */
     	private int value;
+    	/*
+    	 * represents the list of children of the node in the tree
+    	 */
     	private HeapNodeLinkedList children;
+    	/*
+    	 * represents the parent of the node in the tree
+    	 */
     	private HeapNode parent;
     	
     	//****************************************************************************************************************
@@ -428,26 +521,37 @@ public class BinomialHeap
     		this.parent = null;
     		this.rank = 0;
     	}
-    	//****************************************************************************************************************
-    	public HeapNodeLinkedList getChildren()
-    	{
-    		return this.children;
-    	}
     }
   //****************************************************************************************************************
     // an implementation for a sorted linked list, sorted by heapNode rank, small to large.
     public class HeapNodeLinkedList implements Iterable<HeapNode> 
     {
     	
+    	/*
+    	 * represents the first node in the list
+    	 */
     	HeapNodeLinkedListNode mRoot = null;
+    	/*
+    	 * represents the last node in the list
+    	 */
     	HeapNodeLinkedListNode mLast = null;
     	
 //****************************************************************************************************************
     	private class HeapNodeLinkedListNode
     	{
+    		/*
+    		 * represents the HeapNode of the node in the list
+    		 */
     		public HeapNode mValue;
+    		/*
+    		 * represents the next node in the list
+    		 */
     		public HeapNodeLinkedListNode mNext;
+    		/*
+    		 * represents the previous node in the list
+    		 */
     		public HeapNodeLinkedListNode mPrev;
+    		
     		public HeapNodeLinkedListNode(HeapNode nodeToRepresent, HeapNodeLinkedListNode next, HeapNodeLinkedListNode previous)
     		{
     			super();
@@ -461,7 +565,14 @@ public class BinomialHeap
 //****************************************************************************************************************
     	public class HeapNodeIterator implements Iterator<HeapNode>
         {
+    		
+    		/*
+    		 * represents the list
+    		 */
         	HeapNodeLinkedList mLinkedList;
+        	/*
+        	 * represents the node in the current iteration
+        	 */
         	HeapNodeLinkedListNode mCurrentNode;
         	//****************************************************************************************************************
         	public HeapNodeIterator(HeapNodeLinkedList listToIterate)
@@ -482,10 +593,12 @@ public class BinomialHeap
         	//****************************************************************************************************************
             public HeapNode next() 
             {
+            	// if this is the beginning of the list
             	if (null == this.mCurrentNode) 
             	{
             		this.mCurrentNode = this.mLinkedList.mRoot;
 				}
+            	// if this is not the beginning
             	else
             	{
             		this.mCurrentNode = this.mCurrentNode.mNext;
