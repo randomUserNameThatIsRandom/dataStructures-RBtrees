@@ -1,7 +1,11 @@
 package data_structures;
 
 import java.util.Iterator;
+// TODO: remove import of hashset.
+import java.util.HashSet;
+
 import data_structures.BinomialHeap.HeapNodeLinkedList.HeapNodeIterator;
+import data_structures.BinomialHeap.HeapNodeLinkedList.HeapNodeLinkedListNode;
 
 /**
  * BinomialHeap
@@ -26,6 +30,58 @@ public class BinomialHeap
 	private HeapNodeLinkedList roots = new HeapNodeLinkedList();
 	
 	//****************************************************************************************************************
+	// TODO: remove this fucntion!
+	public boolean validateHeapNodesUnickness()
+	{
+		HashSet<HeapNodeLinkedList> hset = new HashSet<HeapNodeLinkedList>();
+		return(validateHeapNodesUnicknessImp(this.roots, hset));
+	}
+	
+	// TODO: remove this function!
+	public boolean validateHeapNodesUnicknessImp( HeapNodeLinkedList list, HashSet<HeapNodeLinkedList> hset)
+	{
+		if (hset.contains(list)) 
+		{
+			return false;
+		}
+		hset.add(list);
+		HeapNodeIterator it = (HeapNodeIterator )list.iterator();
+		HeapNode currNode = null;
+		while(it.hasNext())
+		{
+			currNode = it.next();
+			boolean ret = validateHeapNodesUnicknessImp(currNode.children, hset);
+			if(!ret)
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	// TODO: remove this function!
+	public HashSet getHashOfRoots()
+	{
+		HashSet<HeapNodeLinkedList> hset = new HashSet<HeapNodeLinkedList>();
+		getHashOfRootsImp(this.roots, hset);
+		return hset;
+	}
+	
+	// TODO: remove this function!
+	public void getHashOfRootsImp( HeapNodeLinkedList list, HashSet<HeapNodeLinkedList> hset)
+	{
+		hset.add(list);
+		HeapNodeIterator it = (HeapNodeIterator )list.iterator();
+		HeapNode currNode = null;
+		while(it.hasNext())
+		{
+			currNode = it.next();
+			getHashOfRootsImp(currNode.children, hset);
+		}
+	}
+	
+	//****************************************************************************************************************
+	
    /**
     * public boolean empty()
     *
@@ -54,16 +110,24 @@ public class BinomialHeap
     	// if the heap is empty
     	if(this.empty())
     	{
+    		// TODO: remove the next line
+    		assert(validateHeapNodesUnickness());
     		this.minNode = new HeapNode(value);
     		this.roots.add(minNode);
     		this.size = 1;
+    		// TODO: remove the next line
+    		assert(validateHeapNodesUnickness());
     	}
     	// if the heap is not empty
     	else
     	{
+    		// TODO: remove the next line
+    		assert(validateHeapNodesUnickness());
     		BinomialHeap heap = new BinomialHeap();
         	heap.insert(value);
         	this.meld(heap);
+        	// TODO: remove the next line
+        	assert(validateHeapNodesUnickness());
     	}
     }
   //****************************************************************************************************************
@@ -75,29 +139,101 @@ public class BinomialHeap
     */
     public void deleteMin()
     {
-    	// remove the tree of which minNode is the root
-    	this.size -= (int) Math.pow(2, this.minNode.rank);
-    	this.roots.remove(minNode);
-    	
+    	// TODO: remove the next line
+    	assert(validateHeapNodesUnickness());
     	// get the children of minNode
     	HeapNodeLinkedList subtrees = this.minNode.children;
+    	// remove the tree of which minNode is the root
+    	// TODO: remove the next line
+    	assert(isActualSizeEqualSize());
+    	this.roots.remove(minNode);
+    	this.size -= (int) Math.pow(2, this.minNode.rank);
+    	// TODO: remove the next line
+    	assert(isActualSizeEqualSize());
+    	// TODO: remove the next if
+    	if(this.roots.isThereANodeWithThatPointer(minNode))
+    	{
+    		System.err.println("the node we have just deleted appears twice!");
+    	}
+    	
+    	this.minNode = this.findMinAfterMinDelete();
+    	// TODO: remove the next if
+    	if (0 != this.size) 
+    	{
+    		System.out.println("size is: " + this.size);
+    		assert(this.roots.isThereANodeWithThatPointer(this.minNode));
+		}
     	
     	// iterate all children to add them back to the heap
-     	Iterator<HeapNode> iterator = subtrees.iterator();
+    	HeapNodeIterator iterator = (HeapNodeIterator)subtrees.iterator();
+    	// TODO: remove the next line
+		System.err.println(" number of elements to go: " + iterator.numberOfElementsLeft());
 		while(iterator.hasNext())
 		{
 			HeapNode node = iterator.next();
+			// TODO: remove the next line
+			System.err.println("invoking meld, " + node.rank + " number of elements to go: " + iterator.numberOfElementsLeft());
+			int sizeBefore = iterator.numberOfElementsLeft();
 			node.parent = null;
 			
-			// create new heap with this child and meld it with our heap
+			// create a new heap with this child and meld it with our heap
 			BinomialHeap heap = new BinomialHeap();
 			heap.roots.add(node);
 			heap.minNode = node;
 			heap.size = (int) Math.pow(2, node.rank);
+			// TODO: remove the next if
+			if(null != this.minNode)
+			{
+				assert(this.roots.isThereANodeWithThatPointer(this.minNode));
+			}
+			// TODO: remove the next two lines
+			assert(isActualSizeEqualSize());
+			assert(null != heap.roots.mRoot);
 			this.meld(heap);
+			// TODO: remove the next two lines
+			assert(isActualSizeEqualSize());
+			assert(this.roots.isThereANodeWithThatPointer(this.minNode));
+			// TODO: remove the next if
+			if (sizeBefore < iterator.numberOfElementsLeft())
+			{
+				System.err.println("after invoking meld, there are " + iterator.numberOfElementsLeft() + " elements left");
+			}
 		}
     }
     
+    //****************************************************************************************************************
+ // TODO: document this function.
+    private HeapNode findMinAfterMinDelete()
+    {
+    	Iterator<HeapNode> it = this.roots.iterator();
+    	if (null == this.roots.mRoot) 
+    	{
+    		System.out.println("null roots!");
+    		
+		}
+    	HeapNode currMinNode = null;
+    	HeapNode currNode = null; 
+		while(it.hasNext())
+		{
+			System.out.println("iterating");
+			currNode = it.next();
+			if (null == currMinNode) 
+			{
+				currMinNode = currNode;
+				continue;
+			}
+			if(currMinNode.value > currNode.value)
+			{
+				currMinNode = currNode;
+			}
+		}
+		// TODO: remove the next if
+		if(null == currMinNode)
+		{
+			System.out.println("min found is null, heap size is: " + this.size);
+		}
+		return currMinNode;
+    }
   //****************************************************************************************************************
    /**
     * public int findMin()
@@ -121,8 +257,10 @@ public class BinomialHeap
 //    {
 //    	
 //    }
+    // TODO remove assertions and prints from this function, there are many...
     public void meld (BinomialHeap heap2)
     {    	
+    	assert(validateHeapNodesUnickness());
     	boolean remember1InPosition = false;
     	int rankToRemember1For = -1;
     	HeapNodeIterator heap1RootsIterator = (HeapNodeIterator)this.roots.iterator();
@@ -135,11 +273,13 @@ public class BinomialHeap
     	{
     		while(null != currentNodeHeap2)
         	{
+    			System.out.println("adding in 0");
     			this.roots.add(currentNodeHeap2);
     			currentNodeHeap2 = heap2RootsIterator.next();
         	}
     		this.minNode = heap2.minNode;
     		this.size = heap2.size;
+    		assert(validateHeapNodesUnickness());
     		return;
 		}
 		
@@ -160,6 +300,7 @@ public class BinomialHeap
 		    		{
 		    			assert(false);
 		    		}
+					System.out.println("adding in 1");
 					joinSameRankHeapNodes(prevNode, currentNodeHeap1, heap1RootsIterator.getCurrentNodePosition());
 					this.roots.removeNodeBeforePosition(heap1RootsIterator.getCurrentNodePosition());
 					if(!this.roots.orgenized(true))
@@ -169,6 +310,7 @@ public class BinomialHeap
 					remember1InPosition = true;
 	    			rankToRemember1For = rankAdded + 1;
 	    			currentNodeHeap1 = heap1RootsIterator.next();
+	    			assert(validateHeapNodesUnickness());
 					continue;
 				}
 				else
@@ -193,17 +335,25 @@ public class BinomialHeap
     				}
 	    			assert(false);
 	    		}
+    			System.out.println("adding in 2");
+    			assert(isActualSizeEqualSize());
+    			HeapNodeLinkedListNode prevBefore = ((HeapNodeLinkedListNode)heap1RootsIterator.getCurrentNodePosition()).mPrev;
     			this.roots.insertBeforePosition(heap1RootsIterator.getCurrentNodePosition(), currentNodeHeap2);
+    			assert(validateHeapNodesUnickness());
     			if(!this.roots.orgenized(false))
 	    		{
 	    			assert(false);
 	    		}
     			this.size += (int)Math.pow(2, currentNodeHeap2.rank);
+    			if(!isActualSizeEqualSize())
+    			{
+    				assert(false);
+    			}
     			updateMinIfRequired(currentNodeHeap2);
 				currentNodeHeap2 = heap2RootsIterator.next();
 			}
     		// if the rank we are at in heap1 is smaller we just advance the pointer, we don't know 
-    		//if a merge is required yet
+    		// if a merge is required yet
     		else if(currentNodeHeap1.rank < currentNodeHeap2.rank)
     		{
     			currentNodeHeap1 = heap1RootsIterator.next();
@@ -216,7 +366,12 @@ public class BinomialHeap
 	    		{
 	    			assert(false);
 	    		}
+    			System.out.println("adding in 3, size should increas by " +  Math.pow(2, currentNodeHeap2.rank));
+    			assert(validateHeapNodesUnickness());
+    			System.out.println("is node inserted in list before? " + getHashOfRoots().contains(currentNodeHeap2.children));
     			joinSameRankHeapNodes(currentNodeHeap1, currentNodeHeap2, heap1RootsIterator.getCurrentNodePosition());
+    			//System.out.println("is node inserted in list after? " + getHashOfRoots().contains(currentNodeHeap2.children));
+    			assert(validateHeapNodesUnickness());
     			if(!this.roots.orgenized(true))
 	    		{
 	    			assert(false);
@@ -239,8 +394,11 @@ public class BinomialHeap
 	    			assert(false);
 	    		}
 				int rankAdded = currentNodeHeap1.rank;
+				System.out.println("adding in 4");
+				assert(validateHeapNodesUnickness());
 				joinSameRankHeapNodes(prevNode, currentNodeHeap1, heap1RootsIterator.getCurrentNodePosition());
 				this.roots.removeNodeBeforePosition(heap1RootsIterator.getCurrentNodePosition());
+				assert(validateHeapNodesUnickness());
 				if(!this.roots.orgenized(true))
 	    		{
 	    			assert(false);
@@ -270,31 +428,36 @@ public class BinomialHeap
     	// multiple joinnings in the previous step.
     	if (null != currentNodeHeap2)
     	{
-    		BinomialHeap newTmpHeap = new BinomialHeap();
+    		System.out.println("is the node in 5 already in before anything? " + getHashOfRoots().contains(currentNodeHeap2.children));
+    		//BinomialHeap newTmpHeap = new BinomialHeap();
     		while(null != currentNodeHeap2)
         	{
-        		
-    			newTmpHeap.roots.add(currentNodeHeap2);
-    			currentNodeHeap2 = heap2RootsIterator.next();
-//        		if(!this.roots.orgenized(false))
-//        		{
-//        			assert(false);
-//        		}
-//        		this.roots.insertAfterPosition(heap1RootsIterator.getCurrentNodePosition(), currentNodeHeap2);
-//        		if(!this.roots.orgenized(false))
-//        		{
-//        			assert(false);
-//        		}
-//        		this.size += (int) Math.pow(2, currentNodeHeap2.rank);
-//        		// we have inserted a new node so we will now have a next.
-//        		updateMinIfRequired(heap1RootsIterator.next());
-//        		currentNodeHeap2 = heap2RootsIterator.next();
+    			int thisMaxRank = this.roots.getMaxRank();
+    			if(currentNodeHeap2.rank > thisMaxRank)
+    			{			
+    				System.out.println("adding in 5");
+    				this.roots.addLast(currentNodeHeap2);
+    				if (currentNodeHeap2.value < this.minNode.value) 
+    				{
+    					this.minNode = currentNodeHeap2;
+					}
+    				this.size += (int)Math.pow(2, currentNodeHeap2.rank);
+    				// TODO: remove this comment... this was the mother fucking BUG?!?!?!?!?!?!?!??!?!?!?!?FUCKKKKKKKKK
+    				currentNodeHeap2 = heap2RootsIterator.next();
+    				continue;
+    			}
     			
+    			assert(validateHeapNodesUnickness());
+    			BinomialHeap heap = new BinomialHeap();
+    			heap.roots.add(currentNodeHeap2);
+    			heap.minNode = currentNodeHeap2;
+    			heap.size = (int) Math.pow(2, currentNodeHeap2.rank);
+    			System.out.println("is the node in 5 already in? " + getHashOfRoots().contains(currentNodeHeap2.children));
+    			this.meld(heap);
+    			assert(validateHeapNodesUnickness());
+    			currentNodeHeap2 = heap2RootsIterator.next();
         	}
-    		this.meld(newTmpHeap);
-    		
     	}
-    	
     }
     
     //****************************************************************************************************************
@@ -329,12 +492,28 @@ public class BinomialHeap
     		return;
     	}
     	
-    	if (newNode.value < this.minNode.value) 
+    	if (newNode.value <= this.minNode.value) 
 		{
 			this.minNode = newNode;
 		}
     }
 
+  //****************************************************************************************************************
+    // TODO: remove this function
+    public boolean isActualSizeEqualSize()
+    {
+    	int actuallSize = 0;
+    	Iterator<HeapNode> it = this.roots.iterator();
+    	HeapNode currNode = null;
+    	while (it.hasNext()) 
+    	{
+    		currNode = it.next();
+    		//System.err.println("found node with rank: " + currNode.rank);
+			actuallSize += (int) Math.pow(2,currNode.rank);
+		}
+    	System.out.println("actual size is: " + actuallSize + " size: " +this.size);
+    	return actuallSize == this.size;
+    }
     //****************************************************************************************************************
    /**
     * public int size()
@@ -355,7 +534,7 @@ public class BinomialHeap
 			actuallSize += (int) Math.pow(2,currNode.rank);
 		}
     	
-    	//System.err.println("actual size is: " + actuallSize + " returnning: " +this.size);
+    	//System.out.println("actual size is: " + actuallSize + " returnning: " +this.size);
     	return this.size;
     }
     
@@ -537,7 +716,8 @@ public class BinomialHeap
     	HeapNodeLinkedListNode mLast = null;
     	
 //****************************************************************************************************************
-    	private class HeapNodeLinkedListNode
+    	// TODO: make this class private, was used for debugging
+    	public class HeapNodeLinkedListNode
     	{
     		/*
     		 * represents the HeapNode of the node in the list
@@ -565,7 +745,6 @@ public class BinomialHeap
 //****************************************************************************************************************
     	public class HeapNodeIterator implements Iterator<HeapNode>
         {
-    		
     		/*
     		 * represents the list
     		 */
@@ -574,6 +753,10 @@ public class BinomialHeap
         	 * represents the node in the current iteration
         	 */
         	HeapNodeLinkedListNode mCurrentNode;
+        	/*
+        	 * represents the state that the iterator hasn't been iterated.
+        	 */
+        	boolean hasBeenIterated = false;
         	//****************************************************************************************************************
         	public HeapNodeIterator(HeapNodeLinkedList listToIterate)
         	{
@@ -583,7 +766,7 @@ public class BinomialHeap
         	//****************************************************************************************************************
         	public boolean hasNext() 
         	{
-        		if(null == this.mCurrentNode)
+        		if(!hasBeenIterated)
         		{
         			return (this.mLinkedList.mRoot != null); 
         		}
@@ -593,6 +776,8 @@ public class BinomialHeap
         	//****************************************************************************************************************
             public HeapNode next() 
             {
+            	hasBeenIterated = true;
+            	
             	// if this is the beginning of the list
             	if (null == this.mCurrentNode) 
             	{
@@ -611,15 +796,29 @@ public class BinomialHeap
             	
                 return this.mCurrentNode.mValue;
             }
-            
+          //****************************************************************************************************************
             public Object getCurrentNodePosition()
             {
             	return this.mCurrentNode;
             }
-            
+          //**************************************************************************************************************** 
             public HeapNode getPrev()
             {
             	return this.mCurrentNode.mPrev.mValue;
+            }
+          //****************************************************************************************************************
+            // TODO: delete this function
+            public int numberOfElementsLeft()
+            {
+            	HeapNodeLinkedListNode curNode = this.mCurrentNode;
+            	int numElems = 0;
+            	while(null != curNode)
+            	{
+            		numElems ++;
+            		curNode = curNode.mNext;
+            	}
+            	return numElems;
+            		
             }
 
         }
@@ -641,6 +840,7 @@ public class BinomialHeap
     			HeapNodeLinkedListNode newRoot  = new HeapNodeLinkedListNode(HeapNodeToAdd, mRoot, null);
     			this.mRoot.mPrev = newRoot;
     			this.mRoot = newRoot;
+    			return;
     		}
     		
     		HeapNodeLinkedListNode currentNode = mRoot;
@@ -661,7 +861,7 @@ public class BinomialHeap
     		// getting here means that the node we are adding is the largest one
     		HeapNodeLinkedListNode newNode = new HeapNodeLinkedListNode(HeapNodeToAdd, null, currentNode);
     		currentNode.mNext = newNode;
-    		this.mLast = currentNode;
+    		this.mLast = newNode;
     	}
     	
     	//****************************************************************************************************************
@@ -676,6 +876,10 @@ public class BinomialHeap
     			{
     				this.mLast = null;
 				}
+    			else
+    			{
+    				this.mRoot.mPrev = null;
+    			}
     			return;
     		}
     		
@@ -690,15 +894,20 @@ public class BinomialHeap
     				// if it isn't the last one, set the correct new prev for it's next.
     				if (null != currentNode.mNext) 
     				{
-    					currentNode.mNext.mPrev = currentNode.mPrev; 
+    					currentNode.mNext.mPrev = currentNode.mPrev;
 					}
     				// if it is the last node that we are removing.
     				else
     				{
     					this.mLast = currentNode.mPrev;
     				}
+    				
+    				return;
 				}
+    			currentNode = currentNode.mNext;
     		}
+    		// TODO: remove the next line
+    		assert(false);
     	}
     	
     	//****************************************************************************************************************
@@ -713,7 +922,7 @@ public class BinomialHeap
     			return;
 			}
     		
-    		HeapNodeLinkedListNode newNode = new HeapNodeLinkedListNode(nodeToAdd, this.mLast, null);
+    		HeapNodeLinkedListNode newNode = new HeapNodeLinkedListNode(nodeToAdd, null, this.mLast);
     		this.mLast.mNext = newNode;
     		this.mLast = newNode;
     	}
@@ -745,7 +954,10 @@ public class BinomialHeap
     			 }
     			 
     			 newNode.mNext.mPrev = newNode;
+    			 return;
     		 }
+    		 // TODO: remove assertions
+    		 assert(false);
     	 }
      	//****************************************************************************************************************
     	 
@@ -784,9 +996,14 @@ public class BinomialHeap
     		 {
     			 HeapNodeLinkedListNode positionNode = (HeapNodeLinkedListNode) position;
     			 positionNode.mValue = nodeToRepaceWith;
+    			 return;
+    		 }
+    		 if(null == position)
+    		 {
+    			 this.mLast.mValue = nodeToRepaceWith;
+    			 return;
     		 }
     	 }
-    	 
     	//****************************************************************************************************************
     	 public void removeNodeBeforePosition(Object position)
     	 {
@@ -804,10 +1021,13 @@ public class BinomialHeap
     			nodeToRemove.mPrev.mNext = positionNode;
     			// set the prev for position Node as we are deleting its prev.
     			positionNode.mPrev = nodeToRemove.mPrev;
+    			return;
     		 }
+    		// TODO: remove the next line
+    		 assert(false);
     	 }
     	 
-    	 // TODO remove this
+    	// TODO: delete this function
     	 public boolean orgenized(boolean allowDuplicate)
     	 {
     		 HeapNodeLinkedListNode currNode = this.mRoot;
@@ -852,6 +1072,30 @@ public class BinomialHeap
     			currNode = currNode.mNext;
     		 }
     		 return true;
+    	 }
+    	// TODO: delete this function
+    	 int getMaxRank()
+    	 {
+    		 if (null == mLast) 
+    		 {
+    			 return 0;
+    		 }
+    		 return this.mLast.mValue.rank;
+    	 }
+    	// TODO: delete this function
+    	 boolean isThereANodeWithThatPointer(HeapNode node)
+    	 {
+    		 HeapNodeLinkedListNode currElem = this.mRoot;
+    		 while(null !=currElem)
+    		 {
+    			 if (currElem.mValue == node) 
+    			 {
+    				 return true;
+				}
+    			 currElem = currElem.mNext;
+    		 }
+    		 
+    		 return false;
     	 }
     }
 }
