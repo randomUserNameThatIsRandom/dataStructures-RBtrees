@@ -567,13 +567,13 @@ public class BinomialHeap
     	}
     	
     	// the length of the binary representation is log n
-    	boolean[] arr = new boolean[(int) (Math.log(this.size)/Math.log(2))];
-    	
+    	boolean[] arr = new boolean[(int) (Math.log(this.size)/Math.log(2)) + 1];
+
     	// iterate all roots and update the array in the place of the rank to true
     	Iterator<HeapNode> iterator = this.roots.iterator();
     	while(iterator.hasNext())
     	{
-    		arr[iterator.next().rank - 1] = true;
+    		arr[iterator.next().rank] = true;
     	}
     	
     	return arr;
@@ -606,8 +606,14 @@ public class BinomialHeap
     */
     public boolean isValid() 
     {
+    	// an empty heap is valid
+    	if(this.empty())
+    	{
+    		return true;
+    	}
+    	
     	// array to check that there is only one tree of each degree
-    	HeapNode[] arr = new HeapNode[(int) (Math.log(this.size)/Math.log(2))];
+    	HeapNode[] arr = new HeapNode[(int) (Math.log(this.size)/Math.log(2)) + 1];
     	
     	// iterate all roots to check each tree
     	Iterator<HeapNode> iterator = this.roots.iterator();
