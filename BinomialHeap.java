@@ -2,7 +2,6 @@ package data_structures;
 
 import java.util.Iterator;
 
-import data_structures.BinomialHeap.HeapNodeLinkedList.HeapNodeIterator;
 
 /**
  * BinomialHeap
@@ -85,7 +84,7 @@ public class BinomialHeap
     	this.size -= (int) Math.pow(2, this.minNode.rank);
     	this.minNode = this.findMinAfterMinDelete();
     	// iterate all children to add them back to the heap
-    	HeapNodeIterator iterator = (HeapNodeIterator)subtrees.iterator();
+    	HeapNodeLinkedList.HeapNodeIterator iterator = (HeapNodeLinkedList.HeapNodeIterator)subtrees.iterator();
 		while(iterator.hasNext())
 		{
 			HeapNode node = iterator.next();
@@ -145,8 +144,10 @@ public class BinomialHeap
     {    	
     	boolean remember1InPosition = false;
     	int rankToRemember1For = -1;
-    	HeapNodeIterator heap1RootsIterator = (HeapNodeIterator)this.roots.iterator();
-    	HeapNodeIterator heap2RootsIterator = (HeapNodeIterator)heap2.roots.iterator();
+    	HeapNodeLinkedList.HeapNodeIterator heap1RootsIterator = 
+    			(HeapNodeLinkedList.HeapNodeIterator)this.roots.iterator();
+    	HeapNodeLinkedList.HeapNodeIterator heap2RootsIterator 
+    		= (HeapNodeLinkedList.HeapNodeIterator)heap2.roots.iterator();
     	HeapNode currentNodeHeap2 = heap2RootsIterator.next();
     	HeapNode currentNodeHeap1 = heap1RootsIterator.next();
     	
@@ -236,7 +237,20 @@ public class BinomialHeap
     	if (null != currentNodeHeap2)
     	{
     		while(null != currentNodeHeap2)
-        	{	
+    		{
+     			int thisMaxRank = this.roots.getMaxRank();
+     			if(currentNodeHeap2.rank > thisMaxRank)
+     			{			
+     				this.roots.addLast(currentNodeHeap2);
+     				if (currentNodeHeap2.value < this.minNode.value) 
+     				{
+     					this.minNode = currentNodeHeap2;
+ 					}
+     				this.size += (int)Math.pow(2, currentNodeHeap2.rank);
+     				currentNodeHeap2 = heap2RootsIterator.next();
+     				continue;
+     			}
+     			
     			BinomialHeap heap = new BinomialHeap();
     			heap.roots.add(currentNodeHeap2);
     			heap.minNode = currentNodeHeap2;
@@ -773,6 +787,14 @@ public class BinomialHeap
     			positionNode.mPrev = nodeToRemove.mPrev;
     			return;
     		 }
+    	 }
+    	 int getMaxRank()
+    	 {
+    	 	if (null == mLast) 
+    	 	{
+    	 		return 0;
+    	 	}
+    	 	return this.mLast.mValue.rank;
     	 }
     	 
     }
