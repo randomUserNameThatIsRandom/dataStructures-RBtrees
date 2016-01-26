@@ -100,7 +100,13 @@ public class BinomialHeap
     }
     
     //****************************************************************************************************************
- // TODO: document this function.
+    /**
+     * private HeapNode findMinAfterMinDelete
+     *
+     * Return the node with the minimal value in the heap, can be used
+     * even (and that is it's purpose) when the minNode pointer is no logner valid. 
+     *
+     */
     private HeapNode findMinAfterMinDelete()
     {
     	Iterator<HeapNode> it = this.roots.iterator();
@@ -262,11 +268,21 @@ public class BinomialHeap
     }
     
     //****************************************************************************************************************
+    /**
+     * private void joinSameRankHeapNodes
+     *
+     * joins node1 and node2 into one node, who's root is 
+     * the node with the smaller value between the two nodes
+     * after joining the nodes the new node overrides the node pointed by the
+     * position Object
+     * 
+     */
     private void joinSameRankHeapNodes(HeapNode node1, HeapNode node2, Object position)
     {
     	this.linking++;
     	HeapNode newRoot = null;
 		HeapNode newLeaf = null;
+		// find the node with the minimal value.
 		if(node1.value < node2.value)
 		{
 			newRoot = node1;
@@ -277,15 +293,24 @@ public class BinomialHeap
 			newRoot = node2;
 			newLeaf = node1;
 		}
+		// join the nodes.
 		HeapNodeLinkedList newRootChildren = newRoot.children;
 		newRootChildren.addLast(newLeaf);
 		newRoot.rank++;
 		newLeaf.parent = newRoot;
 		updateMinIfRequired(newRoot);
+		// override the node at position.
 		this.roots.replaceNodeAtPosition(position, newRoot);
     }
     
   //****************************************************************************************************************
+    /**
+     * private void updateMinIfRequired
+     * given a node (usually a node that was just inserted into the heap)
+     * this method will update the minNode pointer if the new node
+     * has a smaller value than the current minimal node.
+     * 
+     */
     private void updateMinIfRequired(HeapNode newNode)
     {
     	if(null == this.minNode)
@@ -312,21 +337,21 @@ public class BinomialHeap
     	return this.size;
     }
     
+    //****************************************************************************************************************
+    
    /**
     * public int minTreeRank()
     *
     * Return the minimum rank of a tree in the heap.
     * 
     */
-    
-  //****************************************************************************************************************
     public int minTreeRank()
     {
     	return this.roots.mRoot.mValue.rank;
     }
 	
   //****************************************************************************************************************
-	   /**
+	/**
     * public boolean[] binaryRep()
     *
     * Return an array containing the binary representation of the heap.
@@ -577,11 +602,23 @@ public class BinomialHeap
                 return this.mCurrentNode.mValue;
             }
           //****************************************************************************************************************
+            /**
+             * public Object getCurrentNodePosition
+             * 
+             * returns a position object used for direct access to the list, by other methods.
+             *  
+             */
             public Object getCurrentNodePosition()
             {
             	return this.mCurrentNode;
             }
-          //**************************************************************************************************************** 
+          //****************************************************************************************************************
+            /**
+             * public Object getPrev
+             * 
+             * returns the previous element in the list
+             *  
+             */
             public HeapNode getPrev()
             {
             	return this.mCurrentNode.mPrev.mValue;
@@ -590,7 +627,13 @@ public class BinomialHeap
         }
     	
 //****************************************************************************************************************
-    	// addition is done in O(n), n being the number of elements in the list, the list is kept sorted.
+    	/**
+         * public void add
+         * 
+         * adds an element to the list
+         * addition is done in O(n), n being the number of elements in the list, the list is kept sorted.
+         *  
+         */
     	public void add(HeapNode HeapNodeToAdd)
     	{
     		// if the list is empty
@@ -631,7 +674,12 @@ public class BinomialHeap
     	}
     	
     	//****************************************************************************************************************
-    	// removes an element from the list, O(1) if the element is the min.
+    	/**
+         * public void remove
+         * 
+         * removes an element from the list, O(1) if the element is the min.
+         *  
+         */
     	public void remove(HeapNode nodeToRemove)
     	{
     		// if the node to remove is the root
@@ -676,7 +724,13 @@ public class BinomialHeap
     	}
     	
     	//****************************************************************************************************************
-    	
+    	/**
+         * public void addLast
+         * 
+         *  adds an element as the new last element in the list.
+         *  Performed in O(1) as we maintain a pointer to the end of the list.
+         *  
+         */
     	public void addLast(HeapNode nodeToAdd)
     	{
     		if (null == this.mLast) 
@@ -700,6 +754,13 @@ public class BinomialHeap
     	 }
     	 
     	//****************************************************************************************************************
+    	 /**
+          * public void insertBeforePosition
+          * 
+          *  inserts an element before the position supplied.
+          *  Performed in O(1). 
+          *  
+          */
     	 public void insertBeforePosition(Object position, HeapNode nodeToInsert)
     	 {
     		 if(HeapNodeLinkedListNode.class.isInstance(position))
@@ -724,7 +785,13 @@ public class BinomialHeap
 
     	 }
      	//****************************************************************************************************************
-    	 
+    	 /**
+          * public void insertAfterPosition
+          * 
+          *  inserts an element after the position supplied.
+          *  Performed in O(1). 
+          *  
+          */
     	 public void insertAfterPosition(Object position, HeapNode nodeToInsert)
     	 {
     		 if(HeapNodeLinkedListNode.class.isInstance(position))
@@ -788,7 +855,14 @@ public class BinomialHeap
     			return;
     		 }
     	 }
-    	 int getMaxRank()
+     	//****************************************************************************************************************
+    	 /**
+          * public int getMaxRank
+          * 
+          *  returns the rank of the node with the highest rank on the list.
+          *  O(1).
+          */
+    	 public int getMaxRank()
     	 {
     	 	if (null == mLast) 
     	 	{
